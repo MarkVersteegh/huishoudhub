@@ -1,0 +1,19 @@
+services:
+  pocketbase:
+    image: ghcr.io/muchobien/pocketbase:latest
+    restart: unless-stopped
+    ports:
+      - "8090:8090"
+    volumes:
+      - ./pb_data:/pb_data
+      - ./pb_public:/pb_public
+      - ./pb_migrations:/pb_migrations
+    environment:
+      PB_ADMIN_EMAIL: admin@huishoudhub.local
+      PB_ADMIN_PASSWORD: Huishoud2026!
+    command: ["--migrationsDir=/pb_migrations"]
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8090/api/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
