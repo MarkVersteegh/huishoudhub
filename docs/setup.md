@@ -19,21 +19,36 @@ browser (iOS/desktop/mobiel)
   SQLite — /pb_data/data.db  (gemount als Docker volume)
 ```
 
-## Lokaal draaien
+## Lokaal draaien (aanbevolen: PocketBase binary)
+
+Download `pocketbase.exe` (Windows AMD64) van [github.com/pocketbase/pocketbase/releases](https://github.com/pocketbase/pocketbase/releases) en zet het in de projectmap. Start daarna:
+
+```powershell
+.\pocketbase.exe serve --dir=pb_data --migrationsDir=pb_migrations --publicDir=pb_public
+```
+
+De app is bereikbaar op http://localhost:8090, de admin-interface op http://localhost:8090/_.
+
+Migraties worden automatisch uitgevoerd bij elke start. Na de eerste keer de taken seeden:
+
+```powershell
+.\scripts\seed.ps1
+```
+
+Frontend-wijzigingen (`index.html`, `app.js`, `styles.css`) doorkopiëren naar `pb_public/` en de browser refreshen — er is geen buildstap.
+
+> Zorg dat de versie van `pocketbase.exe` overeenkomt met de Docker image die op de NAS draait:
+> ```powershell
+> .\pocketbase.exe --version
+> docker run --rm ghcr.io/muchobien/pocketbase:latest --version
+> ```
+
+## Lokaal draaien via Docker
 
 Vereiste: Docker Desktop.
 
 ```powershell
 docker compose up -d
-```
-
-De app is daarna bereikbaar op http://localhost:8090.
-De admin-interface staat op http://localhost:8090/_.
-
-**Eerste keer opstarten:** de migratie wordt automatisch uitgevoerd. Seed daarna de taken:
-
-```powershell
-.\scripts\seed.ps1
 ```
 
 ## Deployment op NAS (Synology)
