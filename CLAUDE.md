@@ -8,11 +8,11 @@ HuishoudHub is a Dutch household task manager — a single-page web app for a fa
 
 ## Architecture
 
-Three files, no modules:
+Three files, no modules — all in `pb_public/` (served directly by PocketBase, no build step):
 
-- [index.html](index.html) — full DOM structure; all views are pre-rendered in HTML and shown/hidden via CSS classes
-- [app.js](app.js) — all logic in one flat script; no classes, no modules
-- [styles.css](styles.css) — all styles including dark theme via `[data-theme="dark"]` on `:root`
+- [pb_public/index.html](pb_public/index.html) — full DOM structure; all views are pre-rendered in HTML and shown/hidden via CSS classes
+- [pb_public/app.js](pb_public/app.js) — all logic in one flat script; no classes, no modules
+- [pb_public/styles.css](pb_public/styles.css) — all styles including dark theme via `[data-theme="dark"]` on `:root`
 
 ### State model
 

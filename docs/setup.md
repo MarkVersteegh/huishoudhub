@@ -35,7 +35,7 @@ Migraties worden automatisch uitgevoerd bij elke start. Na de eerste keer de tak
 .\scripts\seed.ps1
 ```
 
-Frontend-wijzigingen (`index.html`, `app.js`, `styles.css`) doorkopiëren naar `pb_public/` en de browser refreshen — er is geen buildstap.
+Frontend-bestanden (`index.html`, `app.js`, `styles.css`) staan rechtstreeks in `pb_public/`. Bewerk ze daar; er is geen buildstap en geen kopieerstap nodig.
 
 > Zorg dat de versie van `pocketbase.exe` overeenkomt met de Docker image die op de NAS draait:
 > ```powershell
@@ -54,7 +54,7 @@ docker compose up -d
 ## Deployment op NAS (Synology)
 
 1. Kopieer de projectmap naar de NAS (bijv. via `scp` of een gedeelde map).
-2. Zet de admin-credentials in `docker-compose.yml` of via omgevingsvariabelen.
+2. Maak een `.env`-bestand aan op basis van `.env.example` en vul de admin-credentials in.
 3. Start met `docker compose up -d`.
 4. Stel in de Synology Taakplanner een periodieke backup in via `scripts/backup.sh`.
 
