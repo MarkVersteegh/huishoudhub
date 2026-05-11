@@ -1,0 +1,76 @@
+[
+  {
+    "title": "Vaatwasser uitruimen",
+    "persons": ["JV"],
+    "time": "ochtend",
+    "clock": "",
+    "note": "",
+    "repeat_rule": { "type": "daily", "interval": 1 },
+    "start_date": "2026-05-11",
+    "end_date": "2026-05-17",
+    "subtasks_template": []
+  },
+  {
+    "title": "Checkpad ochtend",
+    "persons": ["EV"],
+    "time": "ochtend",
+    "clock": "",
+    "note": "",
+    "repeat_rule": { "type": "weekdays" },
+    "start_date": "2026-05-11",
+    "end_date": "2026-05-17",
+    "subtasks_template": [
+      { "title": "Aankleden" },
+      { "title": "Tanden poetsen" },
+      { "title": "Tas vullen" }
+    ]
+  },
+  {
+    "title": "Was afhalen",
+    "persons": ["EV", "JV"],
+    "time": "middag",
+    "clock": "",
+    "note": "",
+    "repeat_rule": { "type": "weekly", "interval": 1 },
+    "start_date": "2026-05-11",
+    "end_date": "2026-05-25",
+    "subtasks_template": []
+  },
+  {
+    "title": "Tas uitpakken en opruimen",
+    "persons": ["EV"],
+    "time": "middag",
+    "clock": "12:30",
+    "note": "woensdag uit school",
+    "repeat_rule": { "type": "weekly", "days": [3] },
+    "start_date": "2026-05-11",
+    "end_date": "2026-05-17",
+    "subtasks_template": []
+  },
+  {
+    "title": "Afval buiten zetten",
+    "persons": ["JD"],
+    "time": "avond",
+    "clock": "",
+    "note": "eenmalig test",
+    "repeat_rule": { "type": "once" },
+    "start_date": "2026-05-15",
+    "end_date": "2026-05-15",
+    "subtasks_template": []
+  },
+  {
+    "title": "Konijnen verzorgen",
+    "persons": ["JV"],
+    "time": "ochtend",
+    "clock": "",
+    "note": "",
+    "repeat_rule": { "type": "daily", "interval": 1 },
+    "start_date": "2026-05-11",
+    "end_date": "2026-05-17",
+    "subtasks_template": [
+      { "title": "Water verversen" },
+      { "title": "Brokjes bijvullen" },
+      { "title": "Hooi aanvullen" }
+    ]
+  }
+]
