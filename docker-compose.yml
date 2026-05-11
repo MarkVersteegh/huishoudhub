@@ -8,9 +8,11 @@ services:
       - ./pb_data:/pb_data
       - ./pb_public:/pb_public
       - ./pb_migrations:/pb_migrations
+    env_file:
+      - .env
     environment:
-      PB_ADMIN_EMAIL: admin@huishoudhub.local
-      PB_ADMIN_PASSWORD: Huishoud2026!
+      PB_ADMIN_EMAIL: ${PB_ADMIN_EMAIL}
+      PB_ADMIN_PASSWORD: ${PB_ADMIN_PASSWORD}
     command: ["--migrationsDir=/pb_migrations"]
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:8090/api/health"]

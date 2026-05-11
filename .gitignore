@@ -3,3 +3,7 @@ pb_data/
 exports/
 pocketbase.exe
 pocketbase
+.env
+pb_init.log
+pb_init_err.log
+.claude/
