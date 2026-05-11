@@ -113,6 +113,7 @@
           <div class="section-title"><b>Afgerond</b><span id="listDoneLabel"></span></div>
           <div class="compact-list" id="listDoneTasks"></div>
         </div>
+        <div id="listSentinel" style="height:1px"></div>
       </section>
 
       <section class="view" id="formView" aria-live="polite">
@@ -177,8 +178,17 @@
             </div>
           </div>
 
+          <div class="field full" id="scopeField" style="display:none">
+            <label>Wijziging toepassen op</label>
+            <div class="choice-row">
+              <label><input type="radio" name="scope" value="instance" checked><span class="repeat-choice">Alleen deze taak</span></label>
+              <label><input type="radio" name="scope" value="future"><span class="repeat-choice">Deze en toekomstige</span></label>
+            </div>
+          </div>
+
           <div class="form-actions">
             <button class="secondary-button" type="button" data-cancel-form>Annuleren</button>
+            <button class="danger-button" type="button" id="deleteTaskButton" style="display:none">Verwijderen</button>
             <button class="primary-button" type="submit" id="formSubmitButton">Taak toevoegen</button>
           </div>
         </form>
@@ -190,6 +200,14 @@
       <button type="button" data-view-button="week">Deze week</button>
       <button type="button" data-view-button="list">Lijst</button>
     </nav>
+  </div>
+
+  <!-- Taakdetail overlay -->
+  <div class="task-detail-overlay" id="taskDetailOverlay" aria-modal="true" role="dialog">
+    <div class="task-detail" id="taskDetailSheet">
+      <button class="task-detail-close" type="button" id="taskDetailClose" aria-label="Sluiten">×</button>
+      <div id="taskDetailContent"></div>
+    </div>
   </div>
 
   <!-- Persoon-picker: getoond bij eerste gebruik of bij wisselen -->

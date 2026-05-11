@@ -9,6 +9,9 @@ const people = {
 };
 
 let tasks = [];
+let taskCurrentPage = 1;
+let taskTotalPages  = 1;
+let taskLoadingMore = false;
 const activeStatusFilters = new Set();
 const activePersonFilters = new Set();
 let activeView = "today";
@@ -16,20 +19,23 @@ let previousView = "today";
 let editingTaskId = null;
 const expandedTasks = new Set();
 
+function esc(str) {
+  return String(str || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
 // --- Datumhulpfuncties ---
 
 const dutchDays = ["zondag", "maandag", "dinsdag", "woensdag", "donderdag", "vrijdag", "zaterdag"];
 const dutchMonths = ["januari", "februari", "maart", "april", "mei", "juni", "juli", "augustus", "september", "oktober", "november", "december"];
 
 function todayStr() {
-  return new Date().toISOString().slice(0, 10);
+  return new Date().toLocaleDateString("en-CA");
 }
 
 function weekEndStr() {
   const d = new Date();
-  // Einde van de week = aankomende zondag
   d.setDate(d.getDate() + (7 - d.getDay()));
-  return d.toISOString().slice(0, 10);
+  return d.toLocaleDateString("en-CA");
 }
 
 function dateToDay(dateStr) {
@@ -65,19 +71,38 @@ function computeDue(date, note) {
   return dateToDay(date);
 }
 
+function repeatLabel(rule) {
+  if (!rule) return "";
+  switch (rule.type) {
+    case "once":     return "";
+    case "daily":    return rule.interval === 1 ? "dagelijks" : "om de " + rule.interval + " dagen";
+    case "weekdays": return "schooldagen";
+    case "weekly":   return rule.days ? "wekelijks" : "wekelijks";
+    case "monthly":  return "maandelijks";
+    default:         return rule.type;
+  }
+}
+
 function normalize(record) {
   const subtasks = Array.isArray(record.subtasks) ? record.subtasks : [];
   const bucket = computeBucket(record);
+  const persons = Array.isArray(record.persons) ? record.persons
+                : (record.persons ? [record.persons] : []);
+  const series = record.expand && record.expand.series_id ? record.expand.series_id : null;
   return {
     id: record.id,
-    person: record.person,
+    persons: persons,
+    person: persons[0] || "",
+    series_id: record.series_id || "",
     title: record.title,
     date: record.date,
     time: record.time || "",
     clock: record.clock || "",
     note: record.note || "",
-    repeat: record.repeat || "ad-hoc",
-    done: record.done || false,
+    repeat: series ? repeatLabel(series.repeat_rule) : "",
+    done: !!record.done_at,
+    done_at: record.done_at || "",
+    done_by: record.done_by || "",
     subtasks: subtasks,
     bucket: bucket,
     day: dateToDay(record.date),
@@ -89,26 +114,61 @@ function normalize(record) {
 // --- PocketBase API ---
 // Vereist: tasks-collectie in PocketBase admin ingesteld op volledig open rechten (geen auth).
 
+function showError(msg) {
+  const indicator = document.getElementById("loadingIndicator");
+  if (!indicator) return;
+  indicator.textContent = msg;
+  indicator.style.display = "";
+  indicator.style.color = "var(--danger)";
+}
+
+const TASKS_URL = "/api/collections/tasks/records?perPage=100&sort=date&expand=series_id";
+
 async function loadTasks() {
+  let loadFailed = false;
   try {
-    const res = await fetch(POCKETBASE_URL + "/api/collections/tasks/records?perPage=500&sort=date");
-    if (!res.ok) throw new Error(res.status);
+    const res = await fetch(POCKETBASE_URL + TASKS_URL + "&page=1");
+    if (!res.ok) throw new Error("HTTP " + res.status);
     const data = await res.json();
     tasks = data.items.map(normalize);
+    taskCurrentPage = 1;
+    taskTotalPages  = data.totalPages;
   } catch (err) {
-    console.error("Taken laden mislukt:", err);
+    loadFailed = true;
+    showError("Kan taken niet laden — is PocketBase bereikbaar? (" + err.message + ")");
   }
-  const indicator = document.getElementById("loadingIndicator");
-  if (indicator) indicator.style.display = "none";
+  if (!loadFailed) {
+    const indicator = document.getElementById("loadingIndicator");
+    if (indicator) indicator.style.display = "none";
+  }
+  render();
+}
+
+async function loadMoreTasks() {
+  if (taskLoadingMore || taskCurrentPage >= taskTotalPages) return;
+  taskLoadingMore = true;
+  try {
+    const res = await fetch(POCKETBASE_URL + TASKS_URL + "&page=" + (taskCurrentPage + 1));
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    tasks = tasks.concat(data.items.map(normalize));
+    taskCurrentPage++;
+  } catch (err) {
+    showError("Meer taken laden mislukt — controleer de verbinding.");
+  } finally {
+    taskLoadingMore = false;
+  }
   render();
 }
 
 async function reloadTasksSilent() {
   try {
-    const res = await fetch(POCKETBASE_URL + "/api/collections/tasks/records?perPage=500&sort=date");
+    const res = await fetch(POCKETBASE_URL + TASKS_URL + "&page=1");
     if (!res.ok) return;
     const data = await res.json();
     tasks = data.items.map(normalize);
+    taskCurrentPage = 1;
+    taskTotalPages  = data.totalPages;
     render();
   } catch (err) {
     // stil falen bij herverbinding
@@ -160,7 +220,29 @@ async function patchTask(id, data) {
       body: JSON.stringify(data),
     });
   } catch (err) {
-    console.error("Taak bijwerken mislukt:", err);
+    showError("Wijziging niet opgeslagen — controleer de verbinding.");
+  }
+}
+
+async function patchSeries(id, data) {
+  try {
+    await fetch(POCKETBASE_URL + "/api/collections/series/records/" + id, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+  } catch (err) {
+    showError("Serie niet bijgewerkt — controleer de verbinding.");
+  }
+}
+
+async function deleteTask(id) {
+  try {
+    await fetch(POCKETBASE_URL + "/api/collections/tasks/records/" + id, { method: "DELETE" });
+    tasks = tasks.filter(function(t) { return t.id !== id; });
+    render();
+  } catch (err) {
+    showError("Verwijderen mislukt — controleer de verbinding.");
   }
 }
 
@@ -172,8 +254,40 @@ async function saveTask(data) {
       body: JSON.stringify(data),
     });
   } catch (err) {
-    console.error("Taak opslaan mislukt:", err);
+    showError("Taak niet opgeslagen — controleer de verbinding.");
   }
+}
+
+async function createSeries(data) {
+  try {
+    const res = await fetch(POCKETBASE_URL + "/api/collections/series/records", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    return await res.json();
+  } catch (err) {
+    showError("Serie niet opgeslagen — controleer de verbinding.");
+    return null;
+  }
+}
+
+function repeatRuleFromForm(value) {
+  switch (value) {
+    case "dagelijks":     return { type: "daily",   interval: 1 };
+    case "om de 2 dagen": return { type: "daily",   interval: 2 };
+    case "schooldagen":   return { type: "weekdays" };
+    case "wekelijks":     return { type: "weekly",  interval: 1 };
+    case "maandelijks":   return { type: "monthly", interval: 1 };
+    default:              return null;
+  }
+}
+
+function addMonths(dateStr, n) {
+  const d = new Date(dateStr + "T00:00:00");
+  d.setMonth(d.getMonth() + n);
+  return d.toLocaleDateString("en-CA");
 }
 
 // --- Persoonvoorkeur ---
@@ -210,13 +324,13 @@ function visibleTasks() {
       (activeStatusFilters.has("now") && task.bucket === "now") ||
       (activeStatusFilters.has("overdue") && task.bucket === "overdue") ||
       (activeStatusFilters.has("today") && ["overdue", "now", "today"].includes(task.bucket));
-    const matchesPerson = activePersonFilters.size === 0 || activePersonFilters.has(task.person);
+    const matchesPerson = activePersonFilters.size === 0 || task.persons.some(function(p) { return activePersonFilters.has(p); }) || (task.persons.length === 0);
     return matchesStatus && matchesPerson;
   });
 }
 
 function matchesSelectedPeople(task) {
-  return activePersonFilters.size === 0 || activePersonFilters.has(task.person);
+  return activePersonFilters.size === 0 || task.persons.some(function(p) { return activePersonFilters.has(p); }) || (task.persons.length === 0);
 }
 
 function countStatusForSelectedPeople(filter) {
@@ -240,26 +354,27 @@ function taskCard(task) {
   const latePill = task.bucket === "overdue" ? '<span class="pill alert">' + task.late + "</span>" : "";
   const nowPill = task.bucket === "now" ? '<span class="pill now">moet nu</span>' : "";
   const subtasks = task.subtasks || [];
-  const completedSubtasks = subtasks.filter(function(s) { return s.done; }).length;
+  const completedSubtasks = subtasks.filter(function(s) { return !!s.done_at; }).length;
   const isExpanded = expandedTasks.has(task.id);
   const subtaskToggle = subtasks.length
     ? '<button class="subtask-toggle" type="button" data-task-id="' + task.id + '" aria-expanded="' + isExpanded + '" aria-label="Subtaken ' + (isExpanded ? "inklappen" : "uitklappen") + '">' + completedSubtasks + "/" + subtasks.length + " stappen</button>"
     : "";
   const subtaskPanel = subtasks.length && isExpanded
-    ? '<div class="subtasks">' + subtasks.map(function(s) {
-        return '<div class="subtask ' + (s.done ? "done" : "") + '"><span class="subtask-dot">' + (s.done ? "✓" : "") + "</span><span>" + s.title + "</span></div>";
+    ? '<div class="subtasks" data-task-id="' + task.id + '">' + subtasks.map(function(s, i) {
+        const done = !!s.done_at;
+        return '<div class="subtask ' + (done ? "done" : "") + '" data-subtask-idx="' + i + '"><span class="subtask-dot">' + (done ? "✓" : "") + "</span><span>" + esc(s.title) + "</span></div>";
       }).join("") + "</div>"
     : "";
   return '<article class="task ' + statusClass + " " + (task.done ? "done" : "") + " " + (subtasks.length ? "has-subtasks" : "") + " " + (isExpanded ? "expanded" : "") + '" data-id="' + task.id + '">'
-    + '<span class="avatar ' + person.avatarClass + '" title="' + person.name + '">' + task.person + "</span>"
+    + '<span class="avatar ' + person.avatarClass + '" title="' + esc(person.name) + '">' + task.person + "</span>"
     + '<div class="task-main">'
-    + '<span class="task-name">' + task.title + "</span>"
+    + '<span class="task-name">' + esc(task.title) + "</span>"
     + '<div class="task-meta">' + person.name + " · " + taskMeta(task) + "</div>"
     + '<div class="task-status">'
     + latePill + nowPill
-    + (task.time ? '<span class="pill time">' + task.time + "</span>" : "")
-    + (task.clock ? '<span class="pill time">' + task.clock + "</span>" : "")
-    + '<span class="pill">' + task.repeat + "</span>"
+    + (task.time ? '<span class="pill time">' + esc(task.time) + "</span>" : "")
+    + (task.clock ? '<span class="pill time">' + esc(task.clock) + "</span>" : "")
+    + '<span class="pill">' + esc(task.repeat) + "</span>"
     + subtaskToggle
     + "</div></div>"
     + '<div class="task-actions"><button class="check" type="button" aria-label="' + (task.done ? "Taak opnieuw openen" : "Taak afvinken") + '">' + (task.done ? "✓" : "") + "</button></div>"
@@ -273,14 +388,14 @@ function compactTaskCard(task, options) {
   const person = people[task.person];
   const statusClass = task.bucket === "overdue" ? "overdue" : task.bucket === "now" ? "now" : (task.bucket === "soon" || task.bucket === "future") ? "soon" : "today";
   const subtasks = task.subtasks || [];
-  const completedSubtasks = subtasks.filter(function(s) { return s.done; }).length;
+  const completedSubtasks = subtasks.filter(function(s) { return !!s.done_at; }).length;
   const subtaskText = subtasks.length ? '<span class="mini-pill neutral">' + completedSubtasks + "/" + subtasks.length + "</span>" : "";
   const stateText = task.done ? "klaar" : task.bucket === "overdue" ? "te laat" : task.bucket === "now" ? "nu" : task.bucket === "future" ? "later" : task.bucket === "soon" ? "deze week" : "open";
   const stateClass = task.done ? "done" : task.bucket === "overdue" ? "danger" : task.bucket === "now" ? "now" : (task.bucket === "future" || task.bucket === "soon") ? "soon" : "open";
   return '<article class="compact-task ' + statusClass + " " + (task.done ? "done" : "") + '">'
-    + '<span class="avatar ' + person.avatarClass + '" title="' + person.name + '">' + task.person + "</span>"
+    + '<span class="avatar ' + person.avatarClass + '" title="' + esc(person.name) + '">' + task.person + "</span>"
     + '<div class="compact-main">'
-    + '<span class="compact-name">' + task.title + "</span>"
+    + '<span class="compact-name">' + esc(task.title) + "</span>"
     + '<div class="compact-meta">' + person.name + " · " + (task.day || "vandaag") + " · " + taskMeta(task) + "</div>"
     + "</div>"
     + '<div class="compact-status">'
@@ -305,7 +420,9 @@ function renderDone() {
 }
 
 function personFilteredTasks() {
-  return tasks.filter(function(t) { return activePersonFilters.size === 0 || activePersonFilters.has(t.person); });
+  return tasks.filter(function(t) {
+    return activePersonFilters.size === 0 || t.persons.some(function(p) { return activePersonFilters.has(p); }) || t.persons.length === 0;
+  });
 }
 
 function renderCompactList(targetId, labelId, list, emptyText, options) {
@@ -326,7 +443,7 @@ function getWeekDates() {
   ].map(function(g, i) {
     const d = new Date(today);
     d.setDate(today.getDate() + mondayOffset + i);
-    return { name: g.name, targetId: g.targetId, labelId: g.labelId, date: d.toISOString().slice(0, 10) };
+    return { name: g.name, targetId: g.targetId, labelId: g.labelId, date: d.toLocaleDateString("en-CA") };
   });
 }
 
@@ -348,8 +465,8 @@ function renderListView() {
 function renderPeopleSummary() {
   document.getElementById("peopleSummary").innerHTML = Object.keys(people).map(function(initials) {
     const person = people[initials];
-    const open = tasks.filter(function(t) { return t.person === initials && !t.done; }).length;
-    const late = tasks.filter(function(t) { return t.person === initials && t.bucket === "overdue" && !t.done; }).length;
+    const open = tasks.filter(function(t) { return t.persons.indexOf(initials) !== -1 && !t.done; }).length;
+    const late = tasks.filter(function(t) { return t.persons.indexOf(initials) !== -1 && t.bucket === "overdue" && !t.done; }).length;
     return '<button class="person" type="button" data-person="' + initials + '">'
       + '<span class="avatar ' + person.avatarClass + '">' + initials + "</span>"
       + "<span><strong>" + person.name + "</strong><span>" + open + " open · " + late + " te laat</span></span>"
@@ -386,50 +503,118 @@ function updateViewUi() {
 }
 
 function render() {
+  // Tellers zijn altijd zichtbaar in de header
   document.getElementById("nowCount").textContent = countStatusForSelectedPeople("now");
   document.getElementById("overdueCount").textContent = countStatusForSelectedPeople("overdue");
   document.getElementById("todayCount").textContent = countStatusForSelectedPeople("today");
-  renderBucket("now", "nowTasks", "nowLabel");
-  renderBucket("overdue", "overdueTasks", "overdueLabel");
-  renderBucket("today", "todayTasks", "todayLabel");
-  renderDone();
-  renderPeopleSummary();
-  renderWeekView();
-  renderListView();
+
   updateViewUi();
   updateFilterUi();
 
-  // Event listeners die na elke render opnieuw worden gekoppeld (dynamische DOM)
-  document.querySelectorAll(".check").forEach(function(btn) {
-    btn.addEventListener("click", function() {
-      const id = btn.closest(".task").dataset.id;
-      const task = tasks.find(function(t) { return t.id === id; });
-      if (!task) return;
-      task.done = !task.done;
+  // Bouw alleen de actieve weergave opnieuw — de andere zijn niet zichtbaar
+  if (activeView === "today") {
+    renderBucket("now", "nowTasks", "nowLabel");
+    renderBucket("overdue", "overdueTasks", "overdueLabel");
+    renderBucket("today", "todayTasks", "todayLabel");
+    renderDone();
+    renderPeopleSummary();
+  } else if (activeView === "week") {
+    renderWeekView();
+  } else if (activeView === "list") {
+    renderListView();
+  }
+}
+
+// --- Taakdetail ---
+
+function openTaskDetail(task) {
+  const persons = task.persons.length
+    ? task.persons.map(function(p) {
+        const info = people[p] || { name: p, avatarClass: "" };
+        return '<span class="avatar ' + info.avatarClass + '" title="' + info.name + '">' + p + "</span>";
+      }).join("")
+    : '<span class="avatar" title="Geen eigenaar">?</span>';
+
+  const subtasksHtml = task.subtasks && task.subtasks.length
+    ? '<div class="task-detail-subtasks" id="detailSubtasks" data-task-id="' + task.id + '">'
+      + task.subtasks.map(function(s, i) {
+          const done = !!s.done_at;
+          return '<div class="task-detail-subtask ' + (done ? "done" : "") + '" data-subtask-idx="' + i + '">'
+            + '<span class="task-detail-subtask-dot">' + (done ? "✓" : "") + "</span>"
+            + "<span>" + esc(s.title) + "</span>"
+            + "</div>";
+        }).join("")
+      + "</div>"
+    : "";
+
+  const doneBanner = task.done
+    ? '<div class="task-detail-done-banner">Afgerond' + (task.done_by ? " door " + (people[task.done_by] ? people[task.done_by].name : task.done_by) : "") + (task.done_at ? " om " + new Date(task.done_at).toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" }) : "") + "</div>"
+    : "";
+
+  document.getElementById("taskDetailContent").innerHTML =
+    '<div class="task-detail-title">' + esc(task.title) + "</div>"
+    + '<div class="task-detail-persons">' + persons + "</div>"
+    + '<div class="task-detail-row"><span class="task-detail-lbl">Datum</span><span>' + formatDateLabel(task.date) + "</span></div>"
+    + (task.time ? '<div class="task-detail-row"><span class="task-detail-lbl">Tijdstip</span><span>' + esc(task.time) + (task.clock ? " · " + esc(task.clock) : "") + "</span></div>" : "")
+    + (task.repeat ? '<div class="task-detail-row"><span class="task-detail-lbl">Herhaling</span><span>' + esc(task.repeat) + "</span></div>" : "")
+    + (task.note ? '<div class="task-detail-note">' + esc(task.note) + "</div>" : "")
+    + subtasksHtml
+    + doneBanner
+    + '<div class="task-detail-actions">'
+    + '<button class="secondary-button" type="button" id="detailEditBtn">Bewerken</button>'
+    + '<button class="primary-button" type="button" id="detailCheckBtn">' + (task.done ? "Heropenen" : "Afvinken") + "</button>"
+    + "</div>";
+
+  const overlay = document.getElementById("taskDetailOverlay");
+  overlay.classList.add("open");
+
+  document.getElementById("taskDetailClose").onclick = closeTaskDetail;
+  overlay.addEventListener("click", function handler(e) {
+    if (e.target === overlay) { closeTaskDetail(); overlay.removeEventListener("click", handler); }
+  });
+
+  document.getElementById("detailEditBtn").onclick = function() {
+    closeTaskDetail();
+    openTaskForm(task);
+  };
+
+  document.getElementById("detailCheckBtn").onclick = function() {
+    const nowDone = !task.done;
+    task.done = nowDone;
+    task.done_at = nowDone ? new Date().toISOString() : "";
+    task.done_by = nowDone ? (getMyPerson() || "") : "";
+    render();
+    patchTask(task.id, { done_at: task.done_at, done_by: task.done_by });
+    closeTaskDetail();
+  };
+
+  const subtaskPanel = document.getElementById("detailSubtasks");
+  if (subtaskPanel) {
+    subtaskPanel.addEventListener("click", function(e) {
+      const row = e.target.closest(".task-detail-subtask[data-subtask-idx]");
+      if (!row) return;
+      const idx = parseInt(row.dataset.subtaskIdx, 10);
+      if (!task.subtasks[idx]) return;
+      const nowDone = !task.subtasks[idx].done_at;
+      task.subtasks[idx].done_at = nowDone ? new Date().toISOString() : null;
+      const allDone = task.subtasks.every(function(s) { return !!s.done_at; });
+      const patch = { subtasks: task.subtasks };
+      if (allDone && !task.done) {
+        task.done = true;
+        task.done_at = new Date().toISOString();
+        task.done_by = getMyPerson() || "";
+        patch.done_at = task.done_at;
+        patch.done_by = task.done_by;
+      }
       render();
-      patchTask(id, { done: task.done });
+      patchTask(task.id, patch);
+      openTaskDetail(task);
     });
-  });
+  }
+}
 
-  document.querySelectorAll(".subtask-toggle").forEach(function(btn) {
-    btn.addEventListener("click", function() {
-      const id = btn.dataset.taskId;
-      if (expandedTasks.has(id)) expandedTasks.delete(id);
-      else expandedTasks.add(id);
-      render();
-    });
-  });
-
-  document.querySelectorAll(".person").forEach(function(btn) {
-    btn.addEventListener("click", function() { setPersonFilter(btn.dataset.person); });
-  });
-
-  document.querySelectorAll("[data-edit-task]").forEach(function(btn) {
-    btn.addEventListener("click", function() {
-      const task = tasks.find(function(t) { return t.id === btn.dataset.editTask; });
-      if (task) openTaskForm(task);
-    });
-  });
+function closeTaskDetail() {
+  document.getElementById("taskDetailOverlay").classList.remove("open");
 }
 
 // --- Filters & view ---
@@ -450,6 +635,7 @@ function setPersonFilter(filter) {
 
 function setView(view) {
   if (view !== "form") previousView = view;
+  if (activeView === "list" && view !== "list") taskLoadingMore = false;
   activeView = view;
   render();
 }
@@ -479,6 +665,8 @@ function resetTaskForm() {
   form.elements.date.value = todayStr();
   clearSubtaskEditor();
   document.getElementById("formSubmitButton").textContent = "Taak toevoegen";
+  document.getElementById("deleteTaskButton").style.display = "none";
+  document.getElementById("scopeField").style.display = "none";
 }
 
 function openTaskForm(task) {
@@ -486,14 +674,20 @@ function openTaskForm(task) {
   resetTaskForm();
   if (task) {
     editingTaskId = task.id;
+    document.getElementById("deleteTaskButton").style.display = "";
+    const scopeField = document.getElementById("scopeField");
+    scopeField.style.display = task.series_id ? "" : "none";
+    if (task.series_id) scopeField.querySelector('[name="scope"][value="instance"]').checked = true;
     const form = document.getElementById("taskForm");
     form.elements.title.value = task.title;
     form.elements.date.value = task.date || todayStr();
     form.elements.clock.value = task.clock || "";
     form.elements.note.value = task.note || "";
-    form.querySelector('[name="person"][value="' + task.person + '"]').checked = true;
+    form.querySelector('[name="person"][value="' + (task.persons[0] || "") + '"]').checked = true;
     form.querySelector('[name="time"][value="' + (task.time || "") + '"]').checked = true;
-    form.querySelector('[name="repeat"][value="' + task.repeat + '"]').checked = true;
+    const repeatVal = task.repeat || "ad-hoc";
+    const repeatEl = form.querySelector('[name="repeat"][value="' + repeatVal + '"]');
+    if (repeatEl) repeatEl.checked = true;
     (task.subtasks || []).forEach(function(s) { addSubtaskRow(s.title); });
     document.getElementById("formSubmitButton").textContent = "Wijzigingen opslaan";
   }
@@ -502,7 +696,7 @@ function openTaskForm(task) {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-function addTaskFromForm(form) {
+async function addTaskFromForm(form) {
   const formData = new FormData(form);
   const title = String(formData.get("title") || "").trim();
   if (!title) return;
@@ -510,27 +704,110 @@ function addTaskFromForm(form) {
   const subtasks = Array.from(document.querySelectorAll("#subtaskEditor input"))
     .map(function(input) { return input.value.trim(); })
     .filter(Boolean)
-    .map(function(line) { return { title: line, done: false }; });
+    .map(function(line) { return { title: line, done_at: null }; });
 
+  const selectedPerson = String(formData.get("person") || "");
+  const date = String(formData.get("date"));
   const payload = {
-    person: String(formData.get("person")),
+    persons: selectedPerson ? [selectedPerson] : [],
     title: title,
-    date: String(formData.get("date")),
+    date: date,
     time: String(formData.get("time") || ""),
     clock: String(formData.get("clock") || ""),
     note: String(formData.get("note") || "").trim(),
-    repeat: String(formData.get("repeat")),
-    done: false,
+    done_at: "",
+    done_by: "",
     subtasks: subtasks,
   };
 
   if (editingTaskId) {
     const id = editingTaskId;
     const i = tasks.findIndex(function(t) { return t.id === id; });
-    if (i !== -1) tasks[i] = normalize(Object.assign({}, tasks[i], payload));
-    render();
-    patchTask(id, payload);
+    const existingTask = i !== -1 ? tasks[i] : null;
+    const repeatRule = repeatRuleFromForm(String(formData.get("repeat") || ""));
+    const scope = String(formData.get("scope") || "instance");
+
+    if (existingTask && existingTask.series_id && scope === "future") {
+      // Scope: deze en toekomstige taken
+      const futureTasks = tasks.filter(function(t) {
+        return t.series_id === existingTask.series_id && t.date > existingTask.date && !t.done;
+      });
+      futureTasks.sort(function(a, b) { return a.date.localeCompare(b.date); });
+      const allAffected = [existingTask].concat(futureTasks);
+
+      const top5 = allAffected.slice(0, 5).map(function(t) { return "• " + formatDateLabel(t.date) + " — " + t.title; });
+      const extra = allAffected.length > 5 ? "\n+ " + (allAffected.length - 5) + " meer…" : "";
+      if (!confirm(allAffected.length + " taken worden bijgewerkt:\n\n" + top5.join("\n") + extra + "\n\nDoorgaan?")) return;
+
+      // Huidige taak: volledige payload (inclusief eventuele datumwijziging)
+      if (i !== -1) tasks[i] = normalize(Object.assign({}, tasks[i], payload));
+      patchTask(id, payload);
+
+      // Toekomstige taken: titel/personen/tijdstip/opmerking bijwerken, datum laten staan, subtaken resetten
+      const futurePayload = {
+        persons: payload.persons,
+        title: title,
+        time: payload.time,
+        clock: payload.clock,
+        note: payload.note,
+        subtasks: subtasks.map(function(s) { return { title: s.title, done_at: null }; }),
+      };
+      futureTasks.forEach(function(t) {
+        const idx = tasks.findIndex(function(tt) { return tt.id === t.id; });
+        if (idx !== -1) tasks[idx] = normalize(Object.assign({}, tasks[idx], futurePayload));
+        patchTask(t.id, futurePayload);
+      });
+
+      // Serie bijwerken zodat nieuwe instanties de nieuwe instellingen krijgen
+      const seriesPatch = {
+        title: title,
+        persons: payload.persons,
+        time: payload.time,
+        clock: payload.clock,
+        note: payload.note,
+        subtasks_template: subtasks.map(function(s) { return { title: s.title }; }),
+      };
+      if (repeatRule) seriesPatch.repeat_rule = repeatRule;
+      patchSeries(existingTask.series_id, seriesPatch);
+
+      render();
+    } else {
+      // Scope: alleen deze instantie
+      if (repeatRule && existingTask && !existingTask.series_id) {
+        // Ad-hoc taak wordt herhalend: maak een nieuwe serie aan
+        const series = await createSeries({
+          title: title,
+          persons: payload.persons,
+          time: payload.time,
+          clock: payload.clock,
+          note: payload.note,
+          repeat_rule: repeatRule,
+          start_date: date,
+          end_date: addMonths(date, 1),
+          subtasks_template: subtasks.map(function(s) { return { title: s.title }; }),
+        });
+        if (series) payload.series_id = series.id;
+      }
+      if (i !== -1) tasks[i] = normalize(Object.assign({}, tasks[i], payload));
+      render();
+      patchTask(id, payload);
+    }
   } else {
+    const repeatRule = repeatRuleFromForm(String(formData.get("repeat") || ""));
+    if (repeatRule) {
+      const series = await createSeries({
+        title: title,
+        persons: payload.persons,
+        time: payload.time,
+        clock: payload.clock,
+        note: payload.note,
+        repeat_rule: repeatRule,
+        start_date: date,
+        end_date: addMonths(date, 1),
+        subtasks_template: subtasks.map(function(s) { return { title: s.title }; }),
+      });
+      if (series) payload.series_id = series.id;
+    }
     saveTask(payload);
     // SSE voegt de nieuwe taak toe aan de lijst
   }
@@ -546,11 +823,27 @@ function applyTheme(theme) {
   const btn = document.querySelector("[data-theme-toggle]");
   btn.textContent = theme === "dark" ? "☀" : "☾";
   btn.setAttribute("aria-label", theme === "dark" ? "Licht thema" : "Donker thema");
-  localStorage.setItem("huishoudhub-theme", theme);
 }
 
 function toggleTheme() {
   applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
+}
+
+function scheduledTheme() {
+  const h = new Date().getHours();
+  return (h >= 7 && h < 20) ? "light" : "dark";
+}
+
+function scheduleNextThemeSwitch() {
+  const now = new Date();
+  const nowMs = (now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds()) * 1000 + now.getMilliseconds();
+  const transitions = [7 * 3600000, 20 * 3600000];
+  let next = transitions.find(function(t) { return t > nowMs; });
+  if (next === undefined) next = transitions[0] + 86400000; // morgen 7:00
+  setTimeout(function() {
+    applyTheme(scheduledTheme());
+    scheduleNextThemeSwitch();
+  }, next - nowMs);
 }
 
 // --- Statische event listeners (eenmalig gekoppeld bij opstarten) ---
@@ -570,6 +863,17 @@ document.querySelector("[data-theme-toggle]").addEventListener("click", toggleTh
 document.querySelector("[data-cancel-form]").addEventListener("click", function() {
   resetTaskForm();
   setView(previousView);
+});
+
+document.getElementById("deleteTaskButton").addEventListener("click", function() {
+  const id = editingTaskId;
+  if (!id) return;
+  const task = tasks.find(function(t) { return t.id === id; });
+  const label = task ? "“" + task.title + "”" : "deze taak";
+  if (!confirm("Wil je " + label + " verwijderen? Dit kan niet ongedaan worden gemaakt.")) return;
+  resetTaskForm();
+  setView(previousView);
+  deleteTask(id);
 });
 document.getElementById("taskForm").addEventListener("submit", function(e) {
   e.preventDefault();
@@ -615,6 +919,83 @@ document.querySelectorAll("[data-pick-person]").forEach(function(btn) {
 });
 document.getElementById("showPersonPicker").addEventListener("click", showPersonPicker);
 
+// --- Event delegation voor dynamische taakinteracties ---
+// Eenmalig geregistreerd; werkt voor alle renders zonder opnieuw koppelen.
+
+document.querySelector(".main").addEventListener("click", function(e) {
+  // Afvinken
+  const checkBtn = e.target.closest(".check");
+  if (checkBtn) {
+    const id = checkBtn.closest(".task").dataset.id;
+    const task = tasks.find(function(t) { return t.id === id; });
+    if (!task) return;
+    const nowDone = !task.done;
+    task.done = nowDone;
+    task.done_at = nowDone ? new Date().toISOString() : "";
+    task.done_by = nowDone ? (getMyPerson() || "") : "";
+    render();
+    patchTask(id, { done_at: task.done_at, done_by: task.done_by });
+    return;
+  }
+
+  // Subtaken uitklappen/inklappen
+  const toggleBtn = e.target.closest(".subtask-toggle");
+  if (toggleBtn) {
+    const id = toggleBtn.dataset.taskId;
+    if (expandedTasks.has(id)) expandedTasks.delete(id);
+    else expandedTasks.add(id);
+    render();
+    return;
+  }
+
+  // Subtaak afvinken
+  const subtaskRow = e.target.closest(".subtask[data-subtask-idx]");
+  if (subtaskRow) {
+    const panel = subtaskRow.closest(".subtasks");
+    if (!panel) return;
+    const taskId = panel.dataset.taskId;
+    const idx = parseInt(subtaskRow.dataset.subtaskIdx, 10);
+    const task = tasks.find(function(t) { return t.id === taskId; });
+    if (!task || !task.subtasks[idx]) return;
+    const nowDone = !task.subtasks[idx].done_at;
+    task.subtasks[idx].done_at = nowDone ? new Date().toISOString() : null;
+    const allDone = task.subtasks.every(function(s) { return !!s.done_at; });
+    const patch = { subtasks: task.subtasks };
+    if (allDone && !task.done) {
+      task.done = true;
+      task.done_at = new Date().toISOString();
+      task.done_by = getMyPerson() || "";
+      patch.done_at = task.done_at;
+      patch.done_by = task.done_by;
+    }
+    render();
+    patchTask(taskId, patch);
+    return;
+  }
+
+  // Persoonfilter (persoonsstrip in vandaag-weergave)
+  const personBtn = e.target.closest(".person[data-person]");
+  if (personBtn) {
+    setPersonFilter(personBtn.dataset.person);
+    return;
+  }
+
+  // Bewerken
+  const editBtn = e.target.closest("[data-edit-task]");
+  if (editBtn) {
+    const task = tasks.find(function(t) { return t.id === editBtn.dataset.editTask; });
+    if (task) openTaskForm(task);
+    return;
+  }
+
+  // Taakkaart aanklikken → detailweergave
+  const card = e.target.closest(".task[data-id], .compact-task[data-id]");
+  if (card && !e.target.closest("button") && !e.target.closest(".subtasks")) {
+    const task = tasks.find(function(t) { return t.id === card.dataset.id; });
+    if (task) openTaskDetail(task);
+  }
+});
+
 // --- Initialisatie ---
 
 function updateDateDisplay() {
@@ -623,7 +1004,8 @@ function updateDateDisplay() {
   document.querySelector(".date").textContent = name.charAt(0).toUpperCase() + name.slice(1) + " " + today.getDate() + " " + dutchMonths[today.getMonth()];
 }
 
-applyTheme(localStorage.getItem("huishoudhub-theme") || "light");
+applyTheme(scheduledTheme());
+scheduleNextThemeSwitch();
 updateDateDisplay();
 
 const myPerson = getMyPerson();
@@ -634,3 +1016,7 @@ if (myPerson) {
 }
 
 loadTasks().then(function() { subscribeRealtime(); });
+
+new IntersectionObserver(function(entries) {
+  if (entries[0].isIntersecting && activeView === "list") loadMoreTasks();
+}, { rootMargin: "200px" }).observe(document.getElementById("listSentinel"));

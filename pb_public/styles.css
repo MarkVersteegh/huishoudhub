@@ -880,7 +880,8 @@
     }
 
     .secondary-button,
-    .primary-button {
+    .primary-button,
+    .danger-button {
       min-height: 46px;
       border-radius: var(--radius);
       padding: 0 14px;
@@ -891,6 +892,12 @@
       border: 1px solid var(--line);
       background: var(--surface);
       color: var(--ink);
+    }
+
+    .danger-button {
+      border: 1px solid var(--danger);
+      background: var(--surface);
+      color: var(--danger);
     }
 
     .primary-button {
@@ -1126,3 +1133,158 @@
       flex-basis: 44px;
       font-size: 15px;
     }
+
+/* --- Taakdetail overlay --- */
+
+.task-detail-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9000;
+  background: rgba(0, 0, 0, 0.52);
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.task-detail-overlay.open {
+  display: flex;
+}
+
+.task-detail {
+  background: var(--surface-strong);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 28px 24px 28px;
+  position: relative;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.38);
+}
+
+.task-detail-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  line-height: 1;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.task-detail-close:hover { color: var(--ink); }
+
+.task-detail-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 40px 14px 0;
+  color: var(--ink);
+}
+
+.task-detail-persons {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.task-detail-row {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 6px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: var(--ink);
+  align-items: start;
+}
+
+.task-detail-lbl {
+  color: var(--muted);
+  font-size: 13px;
+  padding-top: 1px;
+}
+
+.task-detail-note {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  font-size: 14px;
+  margin: 12px 0 16px;
+  color: var(--ink);
+}
+
+.task-detail-subtasks {
+  margin: 16px 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.task-detail-subtask {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+  font-size: 15px;
+  color: var(--ink);
+  user-select: none;
+}
+
+.task-detail-subtask:last-child { border-bottom: none; }
+
+.task-detail-subtask.done {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.task-detail-subtask-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  flex-shrink: 0;
+  color: transparent;
+}
+
+.task-detail-subtask.done .task-detail-subtask-dot {
+  background: var(--done);
+  border-color: var(--done);
+  color: white;
+}
+
+.task-detail-done-banner {
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  margin-top: 8px;
+}
+
+.task-detail-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.task-detail-actions .primary-button,
+.task-detail-actions .secondary-button {
+  flex: 1;
+}
