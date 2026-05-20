@@ -195,7 +195,18 @@
       align-items: end;
       justify-content: space-between;
       gap: 16px;
+      min-height: 58px;
       margin-bottom: 18px;
+      padding-left: 64px;
+    }
+
+    .top-title {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      transform: translateX(-50%);
+      width: min(420px, calc(100% - 220px));
+      text-align: center;
     }
 
     h1 {
@@ -243,9 +254,8 @@
 
     .fullscreen-toggle {
       position: absolute;
-      left: 50%;
+      left: 0;
       top: 0;
-      transform: translateX(-50%);
       display: grid;
       place-items: center;
       padding: 0;
@@ -1092,6 +1102,12 @@
 
       .topbar {
         align-items: start;
+        min-height: 58px;
+        padding-left: 56px;
+      }
+
+      .top-title {
+        width: min(360px, calc(100% - 180px));
       }
 
       .fullscreen-toggle {
