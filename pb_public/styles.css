@@ -98,6 +98,17 @@
       padding: 18px calc(18px + env(safe-area-inset-right)) 96px calc(18px + env(safe-area-inset-left));
     }
 
+    :root[data-app-fullscreen="true"] .bottom-nav,
+    :fullscreen .bottom-nav {
+      height: 92px;
+      padding-bottom: calc(22px + env(safe-area-inset-bottom));
+    }
+
+    :root[data-app-fullscreen="true"] .bottom-nav button,
+    :fullscreen .bottom-nav button {
+      transform: translateY(-8px);
+    }
+
     .sidebar {
       border-right: 1px solid var(--line);
       background: var(--surface);
