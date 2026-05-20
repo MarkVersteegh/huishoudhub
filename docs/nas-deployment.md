@@ -12,7 +12,7 @@ git status
 git remote add origin git@github.com:<jij>/HuishoudHub.git
 git add .
 git commit -m "Prepare NAS deployment"
-git push -u origin master
+git push -u origin main
 ```
 
 Controleer op GitHub dat `.env`, `pb_data/`, `exports/`, `node_modules/` en test-output niet zijn meegekomen.

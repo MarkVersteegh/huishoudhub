@@ -7,7 +7,7 @@
 #
 # Optionele omgevingsvariabelen:
 #   APP_DIR=/volume1/docker/huishoudhub
-#   BRANCH=master
+#   BRANCH=main
 #   BACKUP_DIR=/volume1/backups/huishoudhub
 #   BASE_URL=http://localhost:8090
 #   PB_ADMIN_EMAIL=admin@huishoudhub.local
@@ -16,7 +16,7 @@
 set -eu
 
 APP_DIR="${APP_DIR:-/volume1/docker/huishoudhub}"
-BRANCH="${BRANCH:-master}"
+BRANCH="${BRANCH:-main}"
 BACKUP_DIR="${BACKUP_DIR:-/volume1/backups/huishoudhub}"
 BASE_URL="${BASE_URL:-http://localhost:8090}"
 
