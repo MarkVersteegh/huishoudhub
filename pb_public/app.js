@@ -231,7 +231,7 @@ function setRepeatInterval(unit, value, options) {
   const label = document.querySelector('[data-interval-repeat-label="' + unit + '"]');
   const wrapper = document.querySelector('[data-repeat-unit="' + unit + '"]');
   if (input) input.value = String(interval);
-  if (label) label.textContent = interval + "-" + repeatIntervalSuffix(unit);
+  if (label) label.textContent = repeatIntervalSuffix(unit);
   if (wrapper && options && options.open) wrapper.classList.add("interval-open");
 }
 
