@@ -651,26 +651,28 @@ function updateFullscreenButton() {
 
 async function toggleFullscreen() {
   const root = document.documentElement;
-  let usedNativeFullscreen = false;
-  try {
-    if (fullscreenElement()) {
-      const exit = document.exitFullscreen || document.webkitExitFullscreen;
-      if (exit) {
-        await exit.call(document);
-        usedNativeFullscreen = true;
-      }
-    } else {
-      const enter = root.requestFullscreen || root.webkitRequestFullscreen;
-      if (enter) {
-        await enter.call(root);
-        usedNativeFullscreen = true;
-      }
-    }
-  } catch (err) {
-    usedNativeFullscreen = false;
+
+  if (appFullscreenActive()) {
+    setAppFullscreen(false);
+    updateFullscreenButton();
+    return;
   }
 
-  if (!usedNativeFullscreen) {
+  if (fullscreenElement()) {
+    try {
+      const exit = document.exitFullscreen || document.webkitExitFullscreen;
+      if (exit) await exit.call(document);
+    } catch (err) {}
+    updateFullscreenButton();
+    return;
+  }
+
+  try {
+    const enter = root.requestFullscreen || root.webkitRequestFullscreen;
+    if (enter) await enter.call(root);
+  } catch (err) {}
+
+  if (!fullscreenElement()) {
     setAppFullscreen(!appFullscreenActive());
   }
   updateFullscreenButton();
