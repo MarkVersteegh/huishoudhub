@@ -628,10 +628,22 @@ function fullscreenElement() {
   return document.fullscreenElement || document.webkitFullscreenElement || null;
 }
 
+function appFullscreenActive() {
+  return document.documentElement.dataset.appFullscreen === "true";
+}
+
+function setAppFullscreen(active) {
+  if (active) {
+    document.documentElement.dataset.appFullscreen = "true";
+  } else {
+    delete document.documentElement.dataset.appFullscreen;
+  }
+}
+
 function updateFullscreenButton() {
   const btn = document.querySelector("[data-fullscreen-toggle]");
   if (!btn) return;
-  const active = !!fullscreenElement();
+  const active = !!fullscreenElement() || appFullscreenActive();
   btn.textContent = active ? "×" : "⛶";
   btn.setAttribute("aria-label", active ? "Volledig scherm sluiten" : "Volledig scherm");
   btn.setAttribute("title", active ? "Volledig scherm sluiten" : "Volledig scherm");
@@ -639,16 +651,27 @@ function updateFullscreenButton() {
 
 async function toggleFullscreen() {
   const root = document.documentElement;
+  let usedNativeFullscreen = false;
   try {
     if (fullscreenElement()) {
       const exit = document.exitFullscreen || document.webkitExitFullscreen;
-      if (exit) await exit.call(document);
+      if (exit) {
+        await exit.call(document);
+        usedNativeFullscreen = true;
+      }
     } else {
       const enter = root.requestFullscreen || root.webkitRequestFullscreen;
-      if (enter) await enter.call(root);
+      if (enter) {
+        await enter.call(root);
+        usedNativeFullscreen = true;
+      }
     }
   } catch (err) {
-    // Sommige Safari/iOS-versies staan fullscreen niet toe; de knop blijft dan gewoon beschikbaar.
+    usedNativeFullscreen = false;
+  }
+
+  if (!usedNativeFullscreen) {
+    setAppFullscreen(!appFullscreenActive());
   }
   updateFullscreenButton();
 }

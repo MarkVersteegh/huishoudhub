@@ -75,6 +75,29 @@
       grid-template-columns: var(--nav-width) minmax(0, 1fr);
     }
 
+    :root[data-app-fullscreen="true"] body {
+      overflow: hidden;
+    }
+
+    :root[data-app-fullscreen="true"] .app {
+      position: fixed;
+      inset: 0;
+      z-index: 9000;
+      min-height: 100dvh;
+      display: block;
+      overflow: auto;
+      background: var(--bg);
+    }
+
+    :root[data-app-fullscreen="true"] .sidebar {
+      display: none;
+    }
+
+    :root[data-app-fullscreen="true"] .main {
+      min-height: 100dvh;
+      padding: 18px calc(18px + env(safe-area-inset-right)) 96px calc(18px + env(safe-area-inset-left));
+    }
+
     .sidebar {
       border-right: 1px solid var(--line);
       background: var(--surface);
