@@ -1,4 +1,4 @@
-import { POCKETBASE_URL } from "./config.js";
+import { POCKETBASE_URL } from "./config.js?v=20260520-filter";
 
 export const TASKS_URL = "/api/collections/tasks/records?perPage=100&sort=date&expand=series_id";
 export const EVENTS_URL = "/api/collections/task_events/records?perPage=100&sort=-created";

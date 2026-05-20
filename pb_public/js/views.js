@@ -1,6 +1,6 @@
-import { people } from "./config.js";
-import { formatDateLabel, getWeekDates, weekRange } from "./dates.js";
-import { completionClass, esc, taskMeta, taskPersonAvatars, taskPersonNames } from "./model.js";
+import { people } from "./config.js?v=20260520-filter";
+import { formatDateLabel, getWeekDates, weekRange } from "./dates.js?v=20260520-filter";
+import { completionClass, esc, taskMeta, taskPersonAvatars, taskPersonNames } from "./model.js?v=20260520-filter";
 
 // Statusfilters en persoonsfilters zijn onafhankelijk en worden hier gecombineerd.
 export function visibleTasks(state) {

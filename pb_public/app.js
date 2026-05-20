@@ -1,5 +1,5 @@
-import { POCKETBASE_URL, people } from "./js/config.js";
-import { addMonths, dutchDays, dutchMonths, formatDateLabel, todayStr } from "./js/dates.js";
+import { POCKETBASE_URL, people } from "./js/config.js?v=20260520-filter";
+import { addMonths, dutchDays, dutchMonths, formatDateLabel, todayStr } from "./js/dates.js?v=20260520-filter";
 import {
   defaultDoneBy,
   esc,
@@ -8,7 +8,7 @@ import {
   normalize,
   parseDoneBy,
   reopenTask,
-} from "./js/model.js";
+} from "./js/model.js?v=20260520-filter";
 import {
   createSeriesRecord,
   deleteTaskRecord,
@@ -18,9 +18,9 @@ import {
   patchTaskRecord,
   saveTaskEvent,
   saveTaskRecord,
-} from "./js/api.js";
-import { buildTaskEvent } from "./js/audit.js";
-import { render as renderView } from "./js/views.js";
+} from "./js/api.js?v=20260520-filter";
+import { buildTaskEvent } from "./js/audit.js?v=20260520-filter";
+import { render as renderView } from "./js/views.js?v=20260520-filter";
 
 // Centrale UI-state; PocketBase blijft de bron van waarheid voor taakdata.
 let tasks = [];

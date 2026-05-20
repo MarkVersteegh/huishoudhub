@@ -1,5 +1,5 @@
-import { people } from "./config.js";
-import { computeBucket, computeDue, computeLate, dateToDay, repeatLabel } from "./dates.js";
+import { people } from "./config.js?v=20260520-filter";
+import { computeBucket, computeDue, computeLate, dateToDay, repeatLabel } from "./dates.js?v=20260520-filter";
 
 // Kleine escape-helper omdat taakgegevens als HTML-string worden gerenderd.
 export function esc(str) {
