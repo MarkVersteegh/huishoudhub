@@ -107,7 +107,7 @@ Het formulier ondersteunt:
 | Tijdslot | Radio | leeg / ochtend / middag / avond |
 | Exacte tijd | Time-input | Optioneel |
 | Opmerking | Tekst | Optioneel |
-| Herhaling | Radio | ad-hoc / dagelijks / om de 2 dagen / schooldagen / wekelijks / maandelijks |
+| Herhaling | Radio | ad-hoc / dagelijks / om de dag / schooldagen / wekelijks / maandelijks |
 | Subtaken | Dynamische lijst | Toevoegen, verwijderen, volgorde aanpassen |
 
 Bij het bewerken van een taak uit een serie verschijnt een scope-keuze:
