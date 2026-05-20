@@ -148,3 +148,11 @@ git push
 ```
 
 Binnen enkele minuten haalt de NAS de nieuwe commit op, probeert een backup te maken, voert `docker compose up -d` uit en doet een healthcheck.
+
+Handmatig meteen verversen kan ook:
+
+```sh
+cd /volume1/docker/huishoudhub
+chmod +x ./scripts/refresh.sh
+./scripts/refresh.sh
+```

@@ -47,6 +47,13 @@ docker compose up -d
 
 Automatische updates lopen via `scripts/update.sh` in Synology Taakplanner. Zie [docs/nas-deployment.md](docs/nas-deployment.md) voor het complete stappenplan met checks en backups.
 
+Handmatig direct verversen op de NAS:
+
+```sh
+cd /volume1/docker/huishoudhub
+./scripts/refresh.sh
+```
+
 ## Belangrijke Mappen
 
 | Pad | Inhoud |
