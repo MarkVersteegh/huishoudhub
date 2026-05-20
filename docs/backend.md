@@ -19,12 +19,12 @@ De backend wordt geconfigureerd via `docker-compose.yml`:
 
 ```yaml
 environment:
-  PB_ADMIN_EMAIL: admin@huishoudhub.local
-  PB_ADMIN_PASSWORD: Huishoud2026!
+  PB_ADMIN_EMAIL: ${PB_ADMIN_EMAIL}
+  PB_ADMIN_PASSWORD: ${PB_ADMIN_PASSWORD}
 command: ["--migrationsDir=/pb_migrations"]
 ```
 
-Het entrypoint-script van de image verwerkt `PB_ADMIN_EMAIL` en `PB_ADMIN_PASSWORD` automatisch bij het opstarten.
+Zet de concrete waarden in een lokaal `.env`-bestand op basis van `.env.example`. Dit bestand staat in `.gitignore` en hoort niet in version control.
 
 ## API-eindpunten (gebruikt door de frontend)
 
@@ -34,13 +34,18 @@ Het entrypoint-script van de image verwerkt `PB_ADMIN_EMAIL` en `PB_ADMIN_PASSWO
 | `POST` | `/api/collections/tasks/records` | Nieuwe taak aanmaken |
 | `PATCH` | `/api/collections/tasks/records/:id` | Taak bijwerken (bijv. afvinken) |
 | `DELETE` | `/api/collections/tasks/records/:id` | Taak verwijderen |
+| `GET` | `/api/collections/series/records` | Herhalingsreeksen ophalen |
+| `POST` | `/api/collections/series/records` | Nieuwe herhalingsreeks maken |
+| `PATCH` | `/api/collections/series/records/:id` | Herhalingsreeks bijwerken |
+| `GET` | `/api/collections/task_events/records` | Audit-events voor `/report/` ophalen |
+| `POST` | `/api/collections/task_events/records` | Audit-event na taakactie vastleggen |
 | `GET` | `/api/realtime` | SSE-verbinding openen |
 | `POST` | `/api/realtime` | Abonneren op een collectie (`{ clientId, subscriptions }`) |
 | `GET` | `/api/health` | Healthcheck (gebruikt door Docker) |
 
 ## Autorisatie
 
-De `tasks`-collectie heeft volledig open API-regels (geen authenticatie vereist voor lees- en schrijfoperaties). Dit is bewust: de app draait op een thuisnetwerk en authenticatie per gebruiker voegt geen waarde toe voor dit gezinsgebruik.
+De `tasks`-, `series`- en `task_events`-collecties hebben volledig open API-regels (geen authenticatie vereist voor lees- en schrijfoperaties). Dit is bewust: de app draait op een thuisnetwerk en authenticatie per gebruiker voegt geen waarde toe voor dit gezinsgebruik.
 
 De admin-interface en backup-API vereisen wel authenticatie (via het `PB_ADMIN_*` account).
 
@@ -57,6 +62,8 @@ De admin-interface en backup-API vereisen wel authenticatie (via het `PB_ADMIN_*
 6. Bij verbindingsverlies: herverbinding na 3 seconden
 ```
 
+De frontend abonneert nu alleen op `tasks`. Wijzigingen aan `series` worden zichtbaar via de taakinstanties die daarna worden aangemaakt of bijgewerkt.
+
 ## Migraties
 
 Migraties staan in `pb_migrations/` als JS-bestanden met de PocketBase migrate-API. Ze worden automatisch uitgevoerd bij het opstarten als ze nog niet zijn toegepast.
@@ -67,4 +74,4 @@ Bestandsnamen volgen het patroon `{unix-timestamp}_{beschrijving}.js`. Elke migr
 
 De ingebouwde backup-API (`POST /api/backups`) maakt een zip van de volledige SQLite-database. Backups worden opgeslagen in `/pb_data/backups/` (gemount als Docker-volume, dus direct toegankelijk op de host).
 
-`scripts/backup.ps1` (Windows) en `scripts/backup.sh` (NAS/Linux) automatiseren dit via de API met admin-authenticatie.
+`scripts/backup.ps1` (Windows) en `scripts/backup.sh` (NAS/Linux) automatiseren dit via de API met admin-authenticatie. Ze lezen standaard `PB_ADMIN_EMAIL` en `PB_ADMIN_PASSWORD` uit de omgeving.

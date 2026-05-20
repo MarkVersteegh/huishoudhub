@@ -7,9 +7,9 @@
 .PARAMETER BaseUrl
     URL van PocketBase. Standaard: http://localhost:8090
 .PARAMETER AdminEmail
-    E-mailadres van de PocketBase admin. Standaard: admin@huishoudhub.local
+    E-mailadres van de PocketBase admin. Standaard: $env:PB_ADMIN_EMAIL.
 .PARAMETER AdminPassword
-    Wachtwoord van de admin. Standaard: Huishoud2026!
+    Wachtwoord van de admin. Standaard: $env:PB_ADMIN_PASSWORD.
 .PARAMETER CopyTo
     Optioneel pad waarnaar de backup gekopieerd wordt (bijv. NAS-share).
 .EXAMPLE
@@ -19,12 +19,16 @@
 #>
 param(
     [string]$BaseUrl = "http://localhost:8090",
-    [string]$AdminEmail = "admin@huishoudhub.local",
-    [string]$AdminPassword = "Huishoud2026!",
+    [string]$AdminEmail = $env:PB_ADMIN_EMAIL,
+    [string]$AdminPassword = $env:PB_ADMIN_PASSWORD,
     [string]$CopyTo = ""
 )
 
 $ErrorActionPreference = "Stop"
+
+if (-not $AdminEmail -or -not $AdminPassword) {
+    throw "Geef -AdminEmail/-AdminPassword mee of zet PB_ADMIN_EMAIL en PB_ADMIN_PASSWORD in de omgeving."
+}
 
 # Authenticeer als admin (PocketBase v0.22+: _superusers collectie)
 $authBody = @{ identity = $AdminEmail; password = $AdminPassword } | ConvertTo-Json

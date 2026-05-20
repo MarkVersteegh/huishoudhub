@@ -4,6 +4,17 @@ Status: ✅ Opgelost · ⚠️ Gedeeltelijk · ❌ Open
 
 ---
 
+## Reviewpunten uitgevoerd
+
+- ✅ Paginering: Vandaag/Deze week laden nu alle taakpagina's bij start en stille herlaadacties.
+- ✅ Auditlog: nieuwe `task_events` collectie plus `/report/` op audit-events.
+- ✅ `done_by`: nieuwe writes gebruiken arrays; legacy comma-strings blijven leesbaar en de migratie converteert bestaande waarden.
+- ✅ Subtaaksync: een afgeronde taak wordt heropend als een subtaak weer opengezet wordt.
+- ✅ Tests: `npm test` dekt static checks, unitlogica, API-integratie en een browser-smoke-test.
+- ✅ Frontendstructuur: `app.js` is opgesplitst met modules onder `pb_public/js/`.
+
+---
+
 ## 1. Credentials uit version control ✅
 
 Opgelost: `.env` bevat admin-credentials, `.gitignore` sluit het uit. `docker-compose.yml` leest via `env_file` + `${PB_ADMIN_*}`. `.env.example` staat als template in de repo.
@@ -36,7 +47,7 @@ Opgelost: root-kopieën verwijderd. Frontend-bestanden staan uitsluitend in `pb_
 
 ## 6. Hard-gelimiteerde paginering ✅
 
-Opgelost: infinite scroll via `IntersectionObserver` op `#listSentinel`. `loadTasks()` haalt `perPage=100` op; `loadMoreTasks()` laadt volgende pagina's bij scrollen naar beneden in de Lijst-weergave. `taskTotalPages` voorkomt onnodige verzoeken.
+Opgelost: `loadTasks()` en stille herlaadacties halen nu alle PocketBase-pagina's op, zodat Vandaag en Deze week compleet zijn zonder dat de gebruiker eerst door Lijst hoeft te scrollen. `loadMoreTasks()` en `IntersectionObserver` blijven aanwezig als lichte fallback, maar normaal zijn alle taken al geladen.
 
 ---
 
@@ -84,8 +95,16 @@ Open: de `tasks`- en `series`-collecties hebben volledig open rechten. Acceptabe
 
 ### Issue A: Ad-hoc taak naar herhalend bij bewerken ✅
 
-Opgelost: in `addTaskFromForm()` wordt bij bewerken gecontroleerd of de taak geen `series_id` heeft én een herhalingsregel is geselecteerd. In dat geval wordt alsnog een nieuwe serie aangemaakt en `series_id` meegegeven in de PATCH. Taken die al een serie hebben, worden gewoon gepatcht (seriebeheer volgt met scope-keuze, issue #11).
+Opgelost: in `addTaskFromForm()` wordt bij bewerken gecontroleerd of de taak geen `series_id` heeft én een herhalingsregel is geselecteerd. In dat geval wordt alsnog een nieuwe serie aangemaakt en `series_id` meegegeven in de PATCH. Taken die al een serie hebben, gebruiken de scope-keuze uit issue #11.
 
 ### Issue B: IntersectionObserver guard mist reset bij wisselen van view ✅
 
 Opgelost: `taskLoadingMore = false` wordt gereset in `setView()` wanneer de gebruiker de Lijst-view verlaat.
+
+### Issue C: Subtaken konden afgeronde hoofdtaak openbreken zonder heropenen ✅
+
+Opgelost: als een subtaak weer open wordt gezet terwijl de hoofdtaak afgerond was, wordt de hoofdtaak opnieuw geopend en worden `done_at` en `done_by` leeggemaakt.
+
+### Issue D: Weekweergave miste weekenddagen ✅
+
+Opgelost: de weektab toont nu maandag t/m zondag. Het blok "Afgerond deze week" gebruikt dezelfde maandag-zondag weekrange.

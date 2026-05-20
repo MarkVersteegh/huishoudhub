@@ -4,12 +4,17 @@
 #
 # Gebruik:
 #   ./backup.sh
-#   ./backup.sh http://192.168.1.50:8090 admin@huishoudhub.local Huishoud2026! /volume1/backup/huishoudhub
+#   PB_ADMIN_EMAIL=admin@huishoudhub.local PB_ADMIN_PASSWORD=... ./backup.sh http://192.168.1.50:8090 /volume1/backup/huishoudhub
 
 BASE_URL="${1:-http://localhost:8090}"
-ADMIN_EMAIL="${2:-admin@huishoudhub.local}"
-ADMIN_PASSWORD="${3:-Huishoud2026!}"
-COPY_TO="${4:-}"
+ADMIN_EMAIL="${PB_ADMIN_EMAIL:-}"
+ADMIN_PASSWORD="${PB_ADMIN_PASSWORD:-}"
+COPY_TO="${2:-}"
+
+if [ -z "$ADMIN_EMAIL" ] || [ -z "$ADMIN_PASSWORD" ]; then
+  echo "Zet PB_ADMIN_EMAIL en PB_ADMIN_PASSWORD voordat je backup.sh draait." >&2
+  exit 1
+fi
 
 TIMESTAMP=$(date +%Y-%m-%d-%H-%M-%S)
 BACKUP_NAME="huishoudhub-$TIMESTAMP.zip"

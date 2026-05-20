@@ -17,7 +17,7 @@ migrate((app) => {
         new RelationField({ name: "series_id", collectionId: series.id, maxSelect: 1, cascadeDelete: false }),
         new JSONField({ name: "persons" }),
         new TextField({ name: "done_at" }),
-        new TextField({ name: "done_by" }),
+        new JSONField({ name: "done_by" }),
     );
 
     app.save(tasks);

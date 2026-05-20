@@ -1,67 +1,131 @@
 # Database
 
-## Schema
+## Collecties
 
-De database bevat één collectie: `tasks`.
+De database gebruikt drie PocketBase-collecties:
+
+| Collectie | Functie |
+|---|---|
+| `tasks` | Concrete taakinstanties op een specifieke datum |
+| `series` | Herhalingsreeksen waaruit taakinstanties worden gegenereerd |
+| `task_events` | Auditlog van taakacties voor rapportage |
+
+PocketBase voegt zelf velden toe zoals `id`, `collectionId`, `collectionName`, `created` en `updated`. De frontend gebruikt alleen de inhoudsvelden hieronder.
+
+## `tasks`
 
 | Veld | Type | Verplicht | Beschrijving |
 |---|---|---|---|
-| `id` | text (PB intern) | — | Unieke identifier, aangemaakt door PocketBase |
-| `person` | text | ja | Initialen van de verantwoordelijke persoon: `EV`, `JV`, `JD`, `MV` |
+| `id` | text (PB intern) | ja | Unieke PocketBase-id |
+| `series_id` | relation -> `series` | nee | Koppeling naar de herhalingsreeks, leeg voor losse taken |
+| `persons` | json | nee | Array met initialen van verantwoordelijken: `EV`, `JV`, `JD`, `MV` |
 | `title` | text | ja | Naam van de taak |
-| `date` | text | ja | ISO-datum (`YYYY-MM-DD`): de (eerstvolgende) uitvoerdatum |
+| `date` | text | ja | ISO-datum (`YYYY-MM-DD`) waarop deze taak verwacht wordt |
 | `time` | text | nee | Tijdslot: `ochtend`, `middag`, `avond` of leeg |
 | `clock` | text | nee | Exacte tijd (`HH:MM`) of leeg |
-| `note` | text | nee | Vrije opmerking (bijv. "woensdag uit school") |
-| `repeat` | text | nee | Herhalingsfrequentie (zie hieronder) |
-| `done` | bool | nee | Of de taak afgerond is |
-| `subtasks` | json | nee | Array van `{ title: string, done: bool }` |
+| `note` | text | nee | Vrije opmerking, bijvoorbeeld `voor school` of `woensdag uit school` |
+| `subtasks` | json | nee | Array met subtaken |
+| `done_at` | text | nee | ISO-tijdstip waarop de taak afgerond is, leeg als openstaand |
+| `done_by` | json | nee | Array met initialen van degene(n) die de taak hebben afgerond, bijvoorbeeld `["EV"]` of `["EV","MV"]` |
 
-De PocketBase-interne velden `collectionId`, `collectionName`, `created` en `updated` worden door de frontend genegeerd.
+`done_at` vervangt het oude boolean-veld `done`. Een taak geldt als afgerond wanneer `done_at` gevuld is.
 
-## Herhalingswaarden
+## `series`
 
-| Waarde | Betekenis |
+| Veld | Type | Verplicht | Beschrijving |
+|---|---|---|---|
+| `id` | text (PB intern) | ja | Unieke PocketBase-id |
+| `title` | text | ja | Naam voor alle taken in de reeks |
+| `persons` | json | nee | Array met verantwoordelijken |
+| `time` | text | nee | Standaard tijdslot |
+| `clock` | text | nee | Standaard exacte tijd |
+| `note` | text | nee | Standaard opmerking |
+| `repeat_rule` | json | ja | Herhalingsregel |
+| `start_date` | text | ja | Eerste datum van de reeks |
+| `end_date` | text | ja | Laatste datum van de reeks |
+| `subtasks_template` | json | nee | Subtaaksjabloon voor gegenereerde taken |
+
+De backend voert de herhalingslogica niet automatisch uit. `scripts/seed.ps1` genereert taakinstanties uit `series`-records. Bij bewerken kan de frontend een serie bijwerken en bestaande toekomstige taakinstanties patchen.
+
+## `task_events`
+
+| Veld | Type | Beschrijving |
+|---|---|---|
+| `event_type` | text | Type actie: `created`, `updated`, `completed`, `reopened`, `subtask_updated`, `deleted` |
+| `task_id` | text | ID van de taakinstantie op het moment van de actie |
+| `task_title` | text | Taaktitel op het moment van de actie |
+| `task_date` | text | Taakdatum op het moment van de actie |
+| `task_persons` | json | Verantwoordelijken op het moment van de actie |
+| `actors` | json | Personen die de actie uitvoerden of afronding claimden |
+| `done_at` | text | Afrondmoment na de actie, indien van toepassing |
+| `done_by` | json | Afronders na de actie, indien van toepassing |
+| `details` | json | Kleine actie-specifieke metadata, zoals scope of subtaakindex |
+| `task_snapshot` | json | Snapshot van de taak na de actie |
+
+`task_events` is append-only vanuit de frontend: wijzigen en verwijderen is technisch nog open zolang de API-regels open zijn, maar de app zelf gebruikt alleen `POST`.
+
+## Herhalingsregels
+
+`repeat_rule` is JSON. De huidige frontend en seed-scripts ondersteunen:
+
+| Voorbeeld | Betekenis |
 |---|---|
-| `ad-hoc` | Eenmalig, geen herhaling |
-| `dagelijks` | Elke dag |
-| `om de 2 dagen` | Afwisselend (startdatum bepaalt de cyclus) |
-| `schooldagen` | Doordeweeks tijdens schoolperiode |
-| `wekelijks` | Eén keer per week (weekdag volgt uit `date`) |
-| `maandelijks` | Eén keer per maand |
+| `{ "type": "once" }` | Eenmalig |
+| `{ "type": "daily", "interval": 1 }` | Dagelijks |
+| `{ "type": "daily", "interval": 2 }` | Om de 2 dagen |
+| `{ "type": "weekdays" }` | Schooldagen / doordeweeks |
+| `{ "type": "weekly", "interval": 1 }` | Wekelijks |
+| `{ "type": "weekly", "days": [3] }` | Wekelijks op specifieke weekdagen |
+| `{ "type": "monthly" }` | Maandelijks |
 
-> **Let op:** de herhalingslogica wordt niet door de backend afgehandeld. De `date`-waarde in de database is altijd de *eerstvolgende* geplande datum. Na het afvinken van een herhalende taak moet de datum handmatig of via een script worden bijgewerkt.
+Weekdagen volgen JavaScript-conventie: zondag `0`, maandag `1`, enzovoort.
 
 ## Datumconventie
 
-Het veld `date` bevat de datum waarop de taak de volgende keer verwacht wordt. De frontend gebruikt dit veld om de bucket te berekenen:
+Het veld `tasks.date` is de concrete uitvoerdatum van die taakinstantie. De frontend berekent daaruit de bucket:
 
-- `date < vandaag` → `overdue`
-- `date == vandaag` → `now` of `today` (afhankelijk van tijdslot)
-- `date` binnen de lopende week → `soon`
-- `date` na de lopende week → `future`
+| Bucket | Wanneer |
+|---|---|
+| `overdue` | `date < vandaag` |
+| `now` | `date == vandaag` en het tijdslot is op dit moment actief |
+| `today` | `date == vandaag`, maar nog niet `now` |
+| `soon` | Na vandaag, binnen de lopende week (maandag t/m zondag) |
+| `future` | Na de lopende week |
 
-## Migratie
+De frontend gebruikt lokale tijd via `toLocaleDateString("en-CA")` om tijdzoneproblemen rond middernacht te vermijden.
 
-Het schema wordt aangemaakt door `pb_migrations/1715000000_create_tasks.js`. De migratie is idempotent: als de collectie al bestaat, wordt ze overgeslagen.
+## Migraties
+
+Migraties staan in `pb_migrations/`:
+
+| Bestand | Functie |
+|---|---|
+| `1715000000_create_tasks.js` | Maakt de oorspronkelijke `tasks`-collectie aan |
+| `1747526401_create_series.js` | Maakt de `series`-collectie aan |
+| `1747526402_refactor_tasks.js` | Vervangt oude velden door `series_id`, `persons`, `done_at`, `done_by` |
+| `1747526403_task_events_and_done_by_json.js` | Zet `done_by` om naar JSON-array en maakt `task_events` |
+
+De migraties zijn idempotent en worden automatisch uitgevoerd bij het starten van PocketBase.
 
 ## Seed
 
-`data/taken-seed.json` bevat 30 initiële taken voor het gezin. Importeren:
+`data/series-seed.json` bevat de actuele bron voor initiële reeksen. Importeren:
 
 ```powershell
 .\scripts\seed.ps1          # Slaat over als er al taken zijn
 .\scripts\seed.ps1 -Force   # Voegt toe ook als er al taken zijn
-.\scripts\seed.ps1 -Clear   # Verwijdert eerst alles, dan importeren
+.\scripts\seed.ps1 -Clear   # Verwijdert eerst alle taken en series
 ```
 
-Het JSON-formaat is gelijk aan de API-payload en kan direct als seed of als export worden gebruikt (round-trip).
+De oude losse seeddata is verwijderd. De huidige seed-flow gebruikt alleen `data/series-seed.json`.
 
 ## Backup en export
 
 | Commando | Resultaat |
 |---|---|
-| `.\scripts\backup.ps1` | Zip van de volledige SQLite-database in `pb_data/backups/` |
-| `.\scripts\export.ps1` | JSON-bestand met alle taken in `exports/` |
+| `.\scripts\backup.ps1` | Zip van de volledige SQLite-database in `pb_data/backups/`; gebruikt `PB_ADMIN_EMAIL` en `PB_ADMIN_PASSWORD` |
+| `.\scripts\export.ps1` | JSON-export van taken in `exports/` |
 
-De export bevat alleen de inhoudsvelden (geen PocketBase-interne velden) en kan direct als seed worden hergebruikt.
+De export bevat taakinstanties in het actuele schema (`series_id`, `persons`, `done_at`, `done_by`) en is bedoeld voor inspectie of losse data-overdracht. Voor een volledige herstelbare backup blijft `backup.ps1` / `backup.sh` leidend, omdat die de hele SQLite-database inclusief `series` bewaart.
+
+`pb_data/` en `exports/` staan in `.gitignore`.

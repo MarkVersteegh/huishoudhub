@@ -39,15 +39,17 @@ while True:
     items = data.get("items", [])
     for item in items:
         all_tasks.append({
-            "person":   item.get("person", ""),
-            "title":    item.get("title", ""),
-            "date":     item.get("date", ""),
-            "time":     item.get("time", ""),
-            "clock":    item.get("clock", ""),
-            "note":     item.get("note", ""),
-            "repeat":   item.get("repeat", ""),
-            "done":     item.get("done", False),
-            "subtasks": item.get("subtasks") or [],
+            "id":        item.get("id", ""),
+            "series_id": item.get("series_id", ""),
+            "persons":   item.get("persons") or [],
+            "title":     item.get("title", ""),
+            "date":      item.get("date", ""),
+            "time":      item.get("time", ""),
+            "clock":     item.get("clock", ""),
+            "note":      item.get("note", ""),
+            "subtasks":  item.get("subtasks") or [],
+            "done_at":   item.get("done_at", ""),
+            "done_by":   item.get("done_by", ""),
         })
     if len(all_tasks) >= data.get("totalItems", 0):
         break

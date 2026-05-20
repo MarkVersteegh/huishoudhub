@@ -2,8 +2,8 @@
 .SYNOPSIS
     Exporteert alle taken uit PocketBase naar een JSON-bestand.
 .DESCRIPTION
-    De export kan direct als input voor seed.ps1 -Force worden gebruikt (round-trip).
-    Interne PocketBase-velden (id, collectionId, created, updated) worden weggelaten.
+    Exporteert taakinstanties in het actuele tasks-schema.
+    Interne PocketBase-velden (collectionId, collectionName, created, updated) worden weggelaten.
 .PARAMETER BaseUrl
     URL van PocketBase. Standaard: http://localhost:8090
 .PARAMETER Output
@@ -37,15 +37,17 @@ if ($allTasks.Count -eq 0) {
 # Strip interne PocketBase-velden
 $export = $allTasks | ForEach-Object {
     [ordered]@{
-        person   = $_.person
-        title    = $_.title
-        date     = $_.date
-        time     = $_.time
-        clock    = $_.clock
-        note     = $_.note
-        repeat   = $_.repeat
-        done     = $_.done
-        subtasks = if ($_.subtasks) { $_.subtasks } else { @() }
+        id        = $_.id
+        series_id = $_.series_id
+        persons   = if ($_.persons) { $_.persons } else { @() }
+        title     = $_.title
+        date      = $_.date
+        time      = $_.time
+        clock     = $_.clock
+        note      = $_.note
+        subtasks  = if ($_.subtasks) { $_.subtasks } else { @() }
+        done_at   = $_.done_at
+        done_by   = $_.done_by
     }
 }
 
