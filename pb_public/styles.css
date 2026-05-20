@@ -1004,7 +1004,7 @@
       }
 
       .main {
-        padding-top: 18px;
+        padding: 18px calc(18px + env(safe-area-inset-right)) 96px calc(18px + env(safe-area-inset-left));
       }
 
       .topbar {
@@ -1076,8 +1076,8 @@
     /* Smalle telefoons: compactere typografie en controls. */
     @media (max-width: 430px) {
       .main {
-        padding-left: 10px;
-        padding-right: 10px;
+        padding-left: calc(16px + env(safe-area-inset-left));
+        padding-right: calc(16px + env(safe-area-inset-right));
       }
 
       h1 {
