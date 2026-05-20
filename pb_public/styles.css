@@ -946,6 +946,12 @@
       pointer-events: none;
     }
 
+    .repeat-row input[type="number"] {
+      position: static;
+      opacity: 1;
+      pointer-events: auto;
+    }
+
     .person-choice,
     .repeat-choice,
     .time-choice {
@@ -966,6 +972,28 @@
     .repeat-row input:checked + .repeat-choice {
       border-color: var(--ink);
       box-shadow: inset 0 0 0 2px var(--ink);
+    }
+
+    .interval-repeat-choice .repeat-choice {
+      gap: 5px;
+    }
+
+    .interval-repeat-choice input[type="number"] {
+      display: none;
+      width: 48px;
+      min-height: 32px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--ink);
+      padding: 3px 4px;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .interval-repeat-choice.interval-open input[type="number"],
+    .interval-repeat-choice input:checked + .repeat-choice input[type="number"]:focus {
+      display: inline-block;
     }
 
     .subtask-editor {

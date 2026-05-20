@@ -1,5 +1,5 @@
-import { POCKETBASE_URL, people } from "./js/config.js?v=20260520-filter";
-import { addMonths, dutchDays, dutchMonths, formatDateLabel, todayStr } from "./js/dates.js?v=20260520-filter";
+import { POCKETBASE_URL, people } from "./js/config.js?v=20260520-repeat-intervals";
+import { addMonths, dutchDays, dutchMonths, formatDateLabel, todayStr } from "./js/dates.js?v=20260520-repeat-intervals";
 import {
   defaultDoneBy,
   esc,
@@ -8,7 +8,7 @@ import {
   normalize,
   parseDoneBy,
   reopenTask,
-} from "./js/model.js?v=20260520-filter";
+} from "./js/model.js?v=20260520-repeat-intervals";
 import {
   createSeriesRecord,
   deleteTaskRecord,
@@ -18,9 +18,9 @@ import {
   patchTaskRecord,
   saveTaskEvent,
   saveTaskRecord,
-} from "./js/api.js?v=20260520-filter";
-import { buildTaskEvent } from "./js/audit.js?v=20260520-filter";
-import { render as renderView } from "./js/views.js?v=20260520-filter";
+} from "./js/api.js?v=20260520-repeat-intervals";
+import { buildTaskEvent } from "./js/audit.js?v=20260520-repeat-intervals";
+import { render as renderView } from "./js/views.js?v=20260520-repeat-intervals";
 
 // Centrale UI-state; PocketBase blijft de bron van waarheid voor taakdata.
 let tasks = [];
@@ -204,12 +204,82 @@ async function createSeries(data) {
 
 function repeatRuleFromForm(value) {
   switch (value) {
-    case "dagelijks":     return { type: "daily",   interval: 1 };
-    case "om de 2 dagen": return { type: "daily",   interval: 2 };
+    case "dagelijks":     return { type: "daily",   interval: repeatIntervalFromForm("daily") };
     case "schooldagen":   return { type: "weekdays" };
-    case "wekelijks":     return { type: "weekly",  interval: 1 };
-    case "maandelijks":   return { type: "monthly", interval: 1 };
+    case "wekelijks":     return { type: "weekly",  interval: repeatIntervalFromForm("weekly") };
+    case "maandelijks":   return { type: "monthly", interval: repeatIntervalFromForm("monthly") };
     default:              return null;
+  }
+}
+
+function repeatIntervalFromForm(unit) {
+  const input = document.getElementById(unit + "Interval");
+  const value = input ? Number.parseInt(input.value, 10) : 1;
+  if (!Number.isFinite(value)) return 1;
+  const max = unit === "daily" ? 365 : unit === "monthly" ? 24 : 52;
+  return Math.max(1, Math.min(max, value));
+}
+
+function repeatIntervalSuffix(unit) {
+  return unit === "daily" ? "dagelijks" : unit === "monthly" ? "maandelijks" : "wekelijks";
+}
+
+function setRepeatInterval(unit, value, options) {
+  const max = unit === "daily" ? 365 : unit === "monthly" ? 24 : 52;
+  const interval = Math.max(1, Math.min(max, Number.parseInt(value, 10) || 1));
+  const input = document.getElementById(unit + "Interval");
+  const label = document.querySelector('[data-interval-repeat-label="' + unit + '"]');
+  const wrapper = document.querySelector('[data-repeat-unit="' + unit + '"]');
+  if (input) input.value = String(interval);
+  if (label) label.textContent = interval + "-" + repeatIntervalSuffix(unit);
+  if (wrapper && options && options.open) wrapper.classList.add("interval-open");
+}
+
+function resetRepeatIntervals() {
+  ["daily", "weekly", "monthly"].forEach(function(unit) {
+    setRepeatInterval(unit, 1);
+  });
+  document.querySelectorAll(".interval-repeat-choice.interval-open").forEach(function(el) {
+    el.classList.remove("interval-open");
+  });
+}
+
+function repeatFormValueFromTask(task) {
+  const rule = task.repeat_rule || null;
+  if (rule) {
+    switch (rule.type) {
+      case "daily": return "dagelijks";
+      case "weekdays": return "schooldagen";
+      case "weekly": return "wekelijks";
+      case "monthly": return "maandelijks";
+      default: return "ad-hoc";
+    }
+  }
+  switch (task.repeat) {
+    case "1-dagelijks":
+    case "dagelijks": return "dagelijks";
+    case "om de dag": return "dagelijks";
+    case "schooldagen": return "schooldagen";
+    case "1-wekelijks":
+    case "wekelijks": return "wekelijks";
+    case "1-maandelijks":
+    case "maandelijks": return "maandelijks";
+    default: return "ad-hoc";
+  }
+}
+
+function setRepeatIntervalsFromTask(task) {
+  const rule = task.repeat_rule || null;
+  if (rule && ["daily", "weekly", "monthly"].includes(rule.type)) {
+    setRepeatInterval(rule.type, rule.interval || 1, { open: (rule.interval || 1) > 1 });
+    return;
+  }
+  const match = String(task.repeat || "").match(/^(\d+)-(dagelijks|wekelijks|maandelijks)$/);
+  if (match) {
+    const unit = match[2] === "dagelijks" ? "daily" : match[2] === "maandelijks" ? "monthly" : "weekly";
+    setRepeatInterval(unit, match[1], { open: Number(match[1]) > 1 });
+  } else if (task.repeat === "om de dag") {
+    setRepeatInterval("daily", 2, { open: true });
   }
 }
 
@@ -437,6 +507,53 @@ function clearListTextFilter() {
   applyListTextFilter("");
 }
 
+function openRepeatIntervalControl(unit) {
+  const wrapper = document.querySelector('[data-repeat-unit="' + unit + '"]');
+  const input = document.getElementById(unit + "Interval");
+  const radio = wrapper ? wrapper.querySelector('input[type="radio"]') : null;
+  if (radio) radio.checked = true;
+  if (wrapper) wrapper.classList.add("interval-open");
+  if (input) {
+    input.focus();
+    input.select();
+  }
+}
+
+function setupRepeatIntervalControls() {
+  document.querySelectorAll("[data-interval-repeat-choice]").forEach(function(choice) {
+    const unit = choice.dataset.intervalRepeatChoice;
+    let holdTimer = null;
+
+    choice.addEventListener("pointerdown", function() {
+      holdTimer = window.setTimeout(function() {
+        openRepeatIntervalControl(unit);
+      }, 450);
+    });
+    ["pointerup", "pointerleave", "pointercancel"].forEach(function(eventName) {
+      choice.addEventListener(eventName, function() {
+        if (holdTimer) window.clearTimeout(holdTimer);
+        holdTimer = null;
+      });
+    });
+    choice.addEventListener("dblclick", function(e) {
+      e.preventDefault();
+      openRepeatIntervalControl(unit);
+    });
+  });
+
+  ["daily", "weekly", "monthly"].forEach(function(unit) {
+    const input = document.getElementById(unit + "Interval");
+    if (!input) return;
+    input.addEventListener("click", function(e) { e.stopPropagation(); });
+    input.addEventListener("input", function(e) {
+      setRepeatInterval(unit, e.currentTarget.value, { open: true });
+    });
+    input.addEventListener("change", function(e) {
+      setRepeatInterval(unit, e.currentTarget.value, { open: true });
+    });
+  });
+}
+
 // --- Formulier ---
 
 function clearSubtaskEditor() {
@@ -459,6 +576,7 @@ function resetTaskForm() {
   editingTaskId = null;
   const form = document.getElementById("taskForm");
   form.reset();
+  resetRepeatIntervals();
   form.elements.date.value = todayStr();
   clearSubtaskEditor();
   document.getElementById("formSubmitButton").textContent = "Taak toevoegen";
@@ -485,7 +603,8 @@ function openTaskForm(task) {
       input.checked = task.persons.indexOf(input.value) !== -1;
     });
     form.querySelector('[name="time"][value="' + (task.time || "") + '"]').checked = true;
-    const repeatVal = task.repeat || "ad-hoc";
+    setRepeatIntervalsFromTask(task);
+    const repeatVal = repeatFormValueFromTask(task);
     const repeatEl = form.querySelector('[name="repeat"][value="' + repeatVal + '"]');
     if (repeatEl) repeatEl.checked = true;
     (task.subtasks || []).forEach(function(s) { addSubtaskRow(s.title); });
@@ -724,6 +843,7 @@ document.querySelectorAll("[data-view-button]").forEach(function(btn) {
 document.querySelector("[data-open-form]").addEventListener("click", function() { openTaskForm(); });
 document.querySelector("[data-theme-toggle]").addEventListener("click", toggleTheme);
 document.querySelector("[data-fullscreen-toggle]").addEventListener("click", toggleFullscreen);
+setupRepeatIntervalControls();
 document.addEventListener("fullscreenchange", updateFullscreenButton);
 document.addEventListener("webkitfullscreenchange", updateFullscreenButton);
 document.querySelector("[data-list-filter-apply]").addEventListener("click", function() {

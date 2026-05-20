@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>HuishoudHub</title>
-  <link rel="stylesheet" href="styles.css?v=20260520-filter">
+  <link rel="stylesheet" href="styles.css?v=20260520-repeat-intervals">
 </head>
 <body>
   <div class="app">
@@ -184,11 +184,28 @@
               <label>Herhaling</label>
               <div class="repeat-row">
                 <label><input type="radio" name="repeat" value="ad-hoc" checked><span class="repeat-choice">Eenmalig</span></label>
-                <label><input type="radio" name="repeat" value="dagelijks"><span class="repeat-choice">Dagelijks</span></label>
-                <label><input type="radio" name="repeat" value="om de 2 dagen"><span class="repeat-choice" title="Iedere 2e dag vanaf startdatum">Om de dag</span></label>
+                <label class="interval-repeat-choice" data-repeat-unit="daily">
+                  <input type="radio" name="repeat" value="dagelijks">
+                  <span class="repeat-choice" data-interval-repeat-choice="daily" title="Vasthouden om het aantal dagen te kiezen">
+                    <span data-interval-repeat-label="daily">1-dagelijks</span>
+                    <input id="dailyInterval" name="dailyInterval" type="number" min="1" max="365" step="1" value="1" aria-label="Aantal dagen">
+                  </span>
+                </label>
                 <label><input type="radio" name="repeat" value="schooldagen"><span class="repeat-choice">Schooldagen</span></label>
-                <label><input type="radio" name="repeat" value="wekelijks"><span class="repeat-choice">Wekelijks</span></label>
-                <label><input type="radio" name="repeat" value="maandelijks"><span class="repeat-choice">Maandelijks</span></label>
+                <label class="interval-repeat-choice" data-repeat-unit="weekly">
+                  <input type="radio" name="repeat" value="wekelijks">
+                  <span class="repeat-choice" data-interval-repeat-choice="weekly" title="Vasthouden om het aantal weken te kiezen">
+                    <span data-interval-repeat-label="weekly">1-wekelijks</span>
+                    <input id="weeklyInterval" name="weeklyInterval" type="number" min="1" max="52" step="1" value="1" aria-label="Aantal weken">
+                  </span>
+                </label>
+                <label class="interval-repeat-choice" data-repeat-unit="monthly">
+                  <input type="radio" name="repeat" value="maandelijks">
+                  <span class="repeat-choice" data-interval-repeat-choice="monthly" title="Vasthouden om het aantal maanden te kiezen">
+                    <span data-interval-repeat-label="monthly">1-maandelijks</span>
+                    <input id="monthlyInterval" name="monthlyInterval" type="number" min="1" max="24" step="1" value="1" aria-label="Aantal maanden">
+                  </span>
+                </label>
               </div>
             </div>
 
@@ -270,6 +287,6 @@
     </div>
   </div>
 
-  <script type="module" src="app.js?v=20260520-filter"></script>
+  <script type="module" src="app.js?v=20260520-repeat-intervals"></script>
 </body>
 </html>

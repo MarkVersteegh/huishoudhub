@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { computeBucket } from "../pb_public/js/dates.js";
+import { computeBucket, repeatLabel } from "../pb_public/js/dates.js";
 import { buildTaskEvent } from "../pb_public/js/audit.js";
 import { completionClass, markTaskDone, normalize, parseDoneBy, reopenTask } from "../pb_public/js/model.js";
 import { countStatusForSelectedPeople, visibleTasks } from "../pb_public/js/views.js";
@@ -42,6 +42,11 @@ assert.equal(computeBucket({ date: "2026-05-19", time: "" }, new Date("2026-05-1
 assert.deepEqual(parseDoneBy(["EV", "MV"]), ["EV", "MV"]);
 assert.deepEqual(parseDoneBy("EV, MV"), ["EV", "MV"]);
 assert.deepEqual(parseDoneBy(""), []);
+
+assert.equal(repeatLabel({ type: "daily", interval: 1 }), "1-dagelijks");
+assert.equal(repeatLabel({ type: "daily", interval: 2 }), "2-dagelijks");
+assert.equal(repeatLabel({ type: "weekly", interval: 4 }), "4-wekelijks");
+assert.equal(repeatLabel({ type: "monthly", interval: 3 }), "3-maandelijks");
 
 // Status- en persoonsfilters blijven onafhankelijk en ondersteunen multi-select.
 const overdue = Object.assign(task({ id: "overdue", persons: ["MV"] }), { bucket: "overdue" });

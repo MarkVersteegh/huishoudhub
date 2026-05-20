@@ -53,10 +53,20 @@ export function repeatLabel(rule) {
   if (!rule) return "";
   switch (rule.type) {
     case "once":     return "";
-    case "daily":    return rule.interval === 1 ? "dagelijks" : rule.interval === 2 ? "om de dag" : "om de " + rule.interval + " dagen";
+    case "daily": {
+      const interval = rule.interval && rule.interval > 1 ? rule.interval : 1;
+      return interval + "-dagelijks";
+    }
     case "weekdays": return "schooldagen";
-    case "weekly":   return rule.days ? "wekelijks" : rule.interval && rule.interval > 1 ? "om de " + rule.interval + " weken" : "wekelijks";
-    case "monthly":  return "maandelijks";
+    case "weekly": {
+      const interval = rule.interval && rule.interval > 1 ? rule.interval : 1;
+      if (rule.days) return interval > 1 ? interval + "-wekelijks" : "1-wekelijks";
+      return interval + "-wekelijks";
+    }
+    case "monthly": {
+      const interval = rule.interval && rule.interval > 1 ? rule.interval : 1;
+      return interval + "-maandelijks";
+    }
     default:         return rule.type;
   }
 }

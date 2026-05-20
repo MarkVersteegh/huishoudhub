@@ -1,5 +1,5 @@
-import { people } from "./config.js?v=20260520-filter";
-import { computeBucket, computeDue, computeLate, dateToDay, repeatLabel } from "./dates.js?v=20260520-filter";
+import { people } from "./config.js?v=20260520-repeat-intervals";
+import { computeBucket, computeDue, computeLate, dateToDay, repeatLabel } from "./dates.js?v=20260520-repeat-intervals";
 
 // Kleine escape-helper omdat taakgegevens als HTML-string worden gerenderd.
 export function esc(str) {
@@ -44,6 +44,7 @@ export function normalize(record) {
     time: record.time || "",
     clock: record.clock || "",
     note: record.note || "",
+    repeat_rule: series ? series.repeat_rule : null,
     repeat: series ? repeatLabel(series.repeat_rule) : "",
     done: !!record.done_at,
     done_at: record.done_at || "",
