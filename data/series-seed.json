@@ -174,5 +174,27 @@
     "start_date": "2026-05-20",
     "end_date": "2026-12-31",
     "subtasks_template": []
+  },
+  {
+    "title": "Douchen",
+    "persons": ["EV"],
+    "time": "avond",
+    "clock": "",
+    "note": "voor het avondeten",
+    "repeat_rule": { "type": "weekly", "days": [0, 3] },
+    "start_date": "2026-05-20",
+    "end_date": "2026-12-31",
+    "subtasks_template": []
+  },
+  {
+    "title": "Douchen",
+    "persons": ["JV"],
+    "time": "avond",
+    "clock": "",
+    "note": "voor het avondeten",
+    "repeat_rule": { "type": "weekly", "days": [0, 3] },
+    "start_date": "2026-05-20",
+    "end_date": "2026-12-31",
+    "subtasks_template": []
   }
 ]
