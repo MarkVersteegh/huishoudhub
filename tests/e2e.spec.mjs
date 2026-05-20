@@ -101,6 +101,11 @@ test("Lijst: tekstfilter zoekt op bevat", async ({ page }) => {
   await page.locator("#listTextFilter").fill("handdoeken");
   await expect(page.locator(".compact-task").filter({ hasText: "Handdoeken test draaien" })).toBeVisible();
   await expect(page.locator(".compact-task").filter({ hasText: "Morgen fruit klaarzetten" })).toHaveCount(0);
+  await page.getByRole("button", { name: "Wissen" }).click();
+  await expect(page.locator(".compact-task").filter({ hasText: "Boodschappenlijst test" })).toBeVisible();
+  await page.locator("#listTextFilter").fill("konijnen");
+  await page.getByRole("button", { name: "Filter toepassen" }).click();
+  await expect(page.locator(".compact-task").filter({ hasText: "Konijnen test verzorgen" })).toBeVisible();
 });
 
 test("Subtaken en dark theme blijven bruikbaar", async ({ page }) => {

@@ -732,6 +732,13 @@
       text-transform: uppercase;
     }
 
+    .list-search-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: 8px;
+      align-items: stretch;
+    }
+
     .list-search input {
       width: 100%;
       min-height: 46px;
@@ -742,6 +749,11 @@
       padding: 9px 12px;
       font-weight: 750;
       box-shadow: var(--shadow);
+    }
+
+    .list-search-row button {
+      box-shadow: var(--shadow);
+      white-space: nowrap;
     }
 
     .compact-group {
@@ -1134,6 +1146,10 @@
         align-items: start;
         grid-template-columns: 48px minmax(0, 1fr) auto;
         min-height: 58px;
+      }
+
+      .list-search-row {
+        grid-template-columns: 1fr;
       }
 
       .add-button {

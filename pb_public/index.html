@@ -116,7 +116,11 @@
       <section class="compact-board view" id="listView" aria-live="polite">
         <div class="list-search">
           <label for="listTextFilter">Zoeken in lijst</label>
-          <input id="listTextFilter" type="search" placeholder="Bijvoorbeeld: douchen, Juliette, zaterdag">
+          <div class="list-search-row">
+            <input id="listTextFilter" type="search" placeholder="Bijvoorbeeld: douchen, Juliette, zaterdag">
+            <button class="primary-button" type="button" data-list-filter-apply>Filter toepassen</button>
+            <button class="secondary-button" type="button" data-list-filter-clear>Wissen</button>
+          </div>
         </div>
         <div class="compact-group">
           <div class="section-title"><b>Openstaand</b><span id="listOpenLabel"></span></div>

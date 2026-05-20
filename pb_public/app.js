@@ -426,6 +426,17 @@ function setView(view) {
   render();
 }
 
+function applyListTextFilter(value) {
+  listTextFilter = value || "";
+  if (activeView === "list") render();
+}
+
+function clearListTextFilter() {
+  const input = document.getElementById("listTextFilter");
+  if (input) input.value = "";
+  applyListTextFilter("");
+}
+
 // --- Formulier ---
 
 function clearSubtaskEditor() {
@@ -715,9 +726,15 @@ document.querySelector("[data-theme-toggle]").addEventListener("click", toggleTh
 document.querySelector("[data-fullscreen-toggle]").addEventListener("click", toggleFullscreen);
 document.addEventListener("fullscreenchange", updateFullscreenButton);
 document.addEventListener("webkitfullscreenchange", updateFullscreenButton);
-document.getElementById("listTextFilter").addEventListener("input", function(e) {
-  listTextFilter = e.target.value;
-  if (activeView === "list") render();
+document.querySelector("[data-list-filter-apply]").addEventListener("click", function() {
+  applyListTextFilter(document.getElementById("listTextFilter").value);
+});
+document.querySelector("[data-list-filter-clear]").addEventListener("click", clearListTextFilter);
+["input", "change", "search", "keyup"].forEach(function(eventName) {
+  document.getElementById("listTextFilter").addEventListener(eventName, function(e) {
+    if (eventName === "keyup" && e.key === "Enter") e.preventDefault();
+    applyListTextFilter(e.currentTarget.value);
+  });
 });
 document.querySelector("[data-cancel-form]").addEventListener("click", function() {
   resetTaskForm();
