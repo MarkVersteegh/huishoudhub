@@ -719,6 +719,31 @@
       gap: 14px;
     }
 
+    .list-search {
+      display: grid;
+      gap: 6px;
+      margin-bottom: 2px;
+    }
+
+    .list-search label {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 850;
+      text-transform: uppercase;
+    }
+
+    .list-search input {
+      width: 100%;
+      min-height: 46px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface-strong);
+      color: var(--ink);
+      padding: 9px 12px;
+      font-weight: 750;
+      box-shadow: var(--shadow);
+    }
+
     .compact-group {
       min-width: 0;
     }

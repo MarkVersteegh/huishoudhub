@@ -29,6 +29,7 @@ let taskTotalPages  = 1;
 let taskLoadingMore = false;
 const activeStatusFilters = new Set();
 const activePersonFilters = new Set();
+let listTextFilter = "";
 let activeView = "today";
 let previousView = "today";
 let editingTaskId = null;
@@ -40,6 +41,7 @@ function currentState() {
     tasks: tasks,
     activeStatusFilters: activeStatusFilters,
     activePersonFilters: activePersonFilters,
+    listTextFilter: listTextFilter,
     activeView: activeView,
     editingTaskId: editingTaskId,
     expandedTasks: expandedTasks,
@@ -713,6 +715,10 @@ document.querySelector("[data-theme-toggle]").addEventListener("click", toggleTh
 document.querySelector("[data-fullscreen-toggle]").addEventListener("click", toggleFullscreen);
 document.addEventListener("fullscreenchange", updateFullscreenButton);
 document.addEventListener("webkitfullscreenchange", updateFullscreenButton);
+document.getElementById("listTextFilter").addEventListener("input", function(e) {
+  listTextFilter = e.target.value;
+  if (activeView === "list") render();
+});
 document.querySelector("[data-cancel-form]").addEventListener("click", function() {
   resetTaskForm();
   setView(previousView);

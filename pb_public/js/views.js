@@ -115,6 +115,31 @@ function personFilteredTasks(state) {
   });
 }
 
+function listSearchText(task) {
+  const subtasks = (task.subtasks || []).map(function(s) { return s.title || ""; }).join(" ");
+  return [
+    task.title,
+    task.note,
+    task.date,
+    task.day,
+    task.time,
+    task.clock,
+    task.repeat,
+    taskPersonNames(task),
+    (task.persons || []).join(" "),
+    subtasks,
+  ].filter(Boolean).join(" ").toLowerCase();
+}
+
+function listFilteredTasks(state) {
+  const query = String(state.listTextFilter || "").trim().toLowerCase();
+  const source = personFilteredTasks(state);
+  if (!query) return source;
+  return source.filter(function(task) {
+    return listSearchText(task).indexOf(query) !== -1;
+  });
+}
+
 function renderCompactList(targetId, labelId, list, emptyText, options) {
   document.getElementById(labelId).textContent = list.length + " taken";
   document.getElementById(targetId).innerHTML = list.length ? list.map(function(t) { return compactTaskCard(t, options); }).join("") : '<div class="empty">' + emptyText + "</div>";
@@ -135,7 +160,7 @@ function renderWeekView(state) {
 
 // Lijst groepeert alle geladen taken in operationele buckets.
 function renderListView(state) {
-  const source = personFilteredTasks(state);
+  const source = listFilteredTasks(state);
   renderCompactList("listOpenTasks", "listOpenLabel", source.filter(function(t) { return !t.done && ["overdue", "now", "today"].includes(t.bucket); }), "Geen openstaande taken");
   renderCompactList("listFutureTasks", "listFutureLabel", source.filter(function(t) { return !t.done && ["soon", "future"].includes(t.bucket); }), "Geen toekomstige taken");
   renderCompactList("listDoneTasks", "listDoneLabel", source.filter(function(t) { return t.done; }), "Nog niets afgerond");

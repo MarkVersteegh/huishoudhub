@@ -96,6 +96,13 @@ test("Lijst: taak toevoegen, bewerken en verwijderen", async ({ page }) => {
   await expect(page.locator(".compact-task").filter({ hasText: updatedTitle })).toHaveCount(0);
 });
 
+test("Lijst: tekstfilter zoekt op bevat", async ({ page }) => {
+  await page.getByRole("button", { name: "Lijst" }).click();
+  await page.locator("#listTextFilter").fill("handdoeken");
+  await expect(page.locator(".compact-task").filter({ hasText: "Handdoeken test draaien" })).toBeVisible();
+  await expect(page.locator(".compact-task").filter({ hasText: "Morgen fruit klaarzetten" })).toHaveCount(0);
+});
+
 test("Subtaken en dark theme blijven bruikbaar", async ({ page }) => {
   // Combineert subtaken en themawissel omdat beide eerder visuele regressies gaven.
   await page.locator("article.task").filter({ hasText: "Konijnen test verzorgen" }).getByRole("button", { name: /Subtaken/ }).click();
