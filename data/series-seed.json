@@ -196,5 +196,16 @@
     "start_date": "2026-05-20",
     "end_date": "2026-12-31",
     "subtasks_template": []
+  },
+  {
+    "title": "OPK buiten zetten",
+    "persons": ["JD"],
+    "time": "avond",
+    "clock": "",
+    "note": "donderdagavond",
+    "repeat_rule": { "type": "weekly", "interval": 4 },
+    "start_date": "2026-06-04",
+    "end_date": "2026-12-31",
+    "subtasks_template": []
   }
 ]

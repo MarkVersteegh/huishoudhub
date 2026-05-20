@@ -55,7 +55,7 @@ export function repeatLabel(rule) {
     case "once":     return "";
     case "daily":    return rule.interval === 1 ? "dagelijks" : rule.interval === 2 ? "om de dag" : "om de " + rule.interval + " dagen";
     case "weekdays": return "schooldagen";
-    case "weekly":   return rule.days ? "wekelijks" : "wekelijks";
+    case "weekly":   return rule.days ? "wekelijks" : rule.interval && rule.interval > 1 ? "om de " + rule.interval + " weken" : "wekelijks";
     case "monthly":  return "maandelijks";
     default:         return rule.type;
   }
