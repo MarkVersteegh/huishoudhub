@@ -79,21 +79,26 @@
       overflow: hidden;
     }
 
-    :root[data-app-fullscreen="true"] .app {
+    :root[data-app-fullscreen="true"] .app,
+    :fullscreen .app {
       position: fixed;
       inset: 0;
       z-index: 9000;
       min-height: 100dvh;
       display: block;
+      width: 100%;
       overflow: auto;
       background: var(--bg);
     }
 
-    :root[data-app-fullscreen="true"] .sidebar {
+    :root[data-app-fullscreen="true"] .sidebar,
+    :fullscreen .sidebar {
       display: none;
     }
 
-    :root[data-app-fullscreen="true"] .main {
+    :root[data-app-fullscreen="true"] .main,
+    :fullscreen .main {
+      width: 100%;
       min-height: 100dvh;
       padding: 18px calc(18px + env(safe-area-inset-right)) 96px calc(18px + env(safe-area-inset-left));
     }
@@ -106,6 +111,36 @@
 
     :root[data-app-fullscreen="true"] .bottom-nav button,
     :fullscreen .bottom-nav button {
+      transform: translateY(-8px);
+    }
+
+    :-webkit-full-screen .app {
+      position: fixed;
+      inset: 0;
+      z-index: 9000;
+      min-height: 100dvh;
+      display: block;
+      width: 100%;
+      overflow: auto;
+      background: var(--bg);
+    }
+
+    :-webkit-full-screen .sidebar {
+      display: none;
+    }
+
+    :-webkit-full-screen .main {
+      width: 100%;
+      min-height: 100dvh;
+      padding: 18px calc(18px + env(safe-area-inset-right)) 96px calc(18px + env(safe-area-inset-left));
+    }
+
+    :-webkit-full-screen .bottom-nav {
+      height: 92px;
+      padding-bottom: calc(22px + env(safe-area-inset-bottom));
+    }
+
+    :-webkit-full-screen .bottom-nav button {
       transform: translateY(-8px);
     }
 
@@ -1041,9 +1076,10 @@
     }
 
     /* Tablet en telefoon: zijbalk verdwijnt, bottom-nav verschijnt. */
-    @media (max-width: 860px) {
+    @media (max-width: 1180px) {
       .app {
         display: block;
+        width: 100%;
       }
 
       .sidebar {
