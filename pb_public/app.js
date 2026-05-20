@@ -624,6 +624,35 @@ function toggleTheme() {
   applyTheme(next);
 }
 
+function fullscreenElement() {
+  return document.fullscreenElement || document.webkitFullscreenElement || null;
+}
+
+function updateFullscreenButton() {
+  const btn = document.querySelector("[data-fullscreen-toggle]");
+  if (!btn) return;
+  const active = !!fullscreenElement();
+  btn.textContent = active ? "×" : "⛶";
+  btn.setAttribute("aria-label", active ? "Volledig scherm sluiten" : "Volledig scherm");
+  btn.setAttribute("title", active ? "Volledig scherm sluiten" : "Volledig scherm");
+}
+
+async function toggleFullscreen() {
+  const root = document.documentElement;
+  try {
+    if (fullscreenElement()) {
+      const exit = document.exitFullscreen || document.webkitExitFullscreen;
+      if (exit) await exit.call(document);
+    } else {
+      const enter = root.requestFullscreen || root.webkitRequestFullscreen;
+      if (enter) await enter.call(root);
+    }
+  } catch (err) {
+    // Sommige Safari/iOS-versies staan fullscreen niet toe; de knop blijft dan gewoon beschikbaar.
+  }
+  updateFullscreenButton();
+}
+
 function scheduledTheme() {
   const h = new Date().getHours();
   return (h >= 7 && h < 20) ? "light" : "dark";
@@ -656,6 +685,9 @@ document.querySelectorAll("[data-view-button]").forEach(function(btn) {
 
 document.querySelector("[data-open-form]").addEventListener("click", function() { openTaskForm(); });
 document.querySelector("[data-theme-toggle]").addEventListener("click", toggleTheme);
+document.querySelector("[data-fullscreen-toggle]").addEventListener("click", toggleFullscreen);
+document.addEventListener("fullscreenchange", updateFullscreenButton);
+document.addEventListener("webkitfullscreenchange", updateFullscreenButton);
 document.querySelector("[data-cancel-form]").addEventListener("click", function() {
   resetTaskForm();
   setView(previousView);
