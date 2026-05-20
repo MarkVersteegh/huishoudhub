@@ -71,7 +71,9 @@ function compactTaskCard(task, options) {
   const subtasks = task.subtasks || [];
   const completedSubtasks = subtasks.filter(function(s) { return !!s.done_at; }).length;
   const subtaskText = subtasks.length ? '<span class="mini-pill neutral">' + completedSubtasks + "/" + subtasks.length + "</span>" : "";
+  const dateText = String(task.date || "").slice(8, 10) + "-" + String(task.date || "").slice(5, 7);
   return '<article class="compact-task ' + statusClass + " " + (task.done ? "done" : "") + " " + doneClass + '" data-id="' + task.id + '">'
+    + '<span class="compact-date">' + esc(dateText) + "</span>"
     + taskPersonAvatars(task)
     + '<div class="compact-main">'
     + '<span class="compact-name">' + esc(task.title) + "</span>"

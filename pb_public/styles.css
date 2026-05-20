@@ -736,7 +736,7 @@
       background: var(--surface-strong);
       padding: 7px 8px;
       display: grid;
-      grid-template-columns: auto minmax(0, 1fr) auto;
+      grid-template-columns: 44px auto minmax(0, 1fr) auto;
       gap: 8px;
       align-items: center;
     }
@@ -775,6 +775,20 @@
 
     .compact-main {
       min-width: 0;
+    }
+
+    .compact-date {
+      display: grid;
+      place-items: center;
+      min-height: 30px;
+      border-radius: 6px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: 0;
     }
 
     .compact-name {
