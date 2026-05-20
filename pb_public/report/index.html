@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HuishoudHub Report</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gridjs/dist/theme/mermaid.min.css">
+  <link rel="stylesheet" href="/report/report.css">
+</head>
+<body>
+  <main class="report-shell">
+    <header class="report-header">
+      <div>
+        <a class="back-link" href="/">HuishoudHub</a>
+        <h1>Actierapport</h1>
+        <p>Alle gelogde taakacties uit PocketBase, inclusief technische kolommen en snapshots.</p>
+      </div>
+      <button id="refreshButton" type="button">Verversen</button>
+    </header>
+
+    <section class="filters" aria-label="Filters">
+      <label>
+        Persoon
+        <select id="personFilter">
+          <option value="">Iedereen</option>
+          <option value="EV">Emmy</option>
+          <option value="JV">Joris</option>
+          <option value="JD">Juliette</option>
+          <option value="MV">Mark</option>
+        </select>
+      </label>
+      <label>
+        Actietype
+        <select id="eventTypeFilter">
+          <option value="">Alles</option>
+          <option value="created">Aangemaakt</option>
+          <option value="updated">Bijgewerkt</option>
+          <option value="completed">Afgerond</option>
+          <option value="reopened">Heropend</option>
+          <option value="subtask_updated">Subtaak aangepast</option>
+          <option value="deleted">Verwijderd</option>
+        </select>
+      </label>
+      <label>
+        Vanaf
+        <input id="dateFromFilter" type="date">
+      </label>
+      <label>
+        Tot en met
+        <input id="dateToFilter" type="date">
+      </label>
+      <label>
+        Afgerond door
+        <select id="doneByFilter">
+          <option value="">Iedereen</option>
+          <option value="EV">Emmy</option>
+          <option value="JV">Joris</option>
+          <option value="JD">Juliette</option>
+          <option value="MV">Mark</option>
+        </select>
+      </label>
+      <button id="clearFiltersButton" type="button">Reset filters</button>
+    </section>
+
+    <section class="report-meta" aria-live="polite">
+      <span id="reportStatus">Laden...</span>
+      <span id="reportCount"></span>
+    </section>
+
+    <section id="table" class="table-wrap" aria-label="Actietabel"></section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/gridjs/dist/gridjs.umd.js"></script>
+  <script src="/report/report.js?v=20260512"></script>
+</body>
+</html>

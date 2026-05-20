@@ -45,7 +45,7 @@
         </button>
         <button class="metric select-all" type="button" data-filter="today">
           <strong id="todayCount">0</strong>
-          <span>vandaag</span>
+          <span>alles</span>
         </button>
       </section>
 
@@ -54,7 +54,7 @@
         <button class="filter" type="button" data-person-filter="JV"><span class="avatar jv">JV</span> Joris</button>
         <button class="filter" type="button" data-person-filter="JD"><span class="avatar jd">JD</span> Juliette</button>
         <button class="filter" type="button" data-person-filter="MV"><span class="avatar mv">MV</span> Mark</button>
-        <button class="filter select-all active" type="button" data-person-filter="all">Alles</button>
+        <button class="filter select-all active" type="button" data-person-filter="all">Iedereen</button>
       </section>
 
       <section class="board view active" id="todayView" aria-live="polite">
@@ -70,7 +70,7 @@
         </div>
 
         <div class="column">
-          <div class="section-title"><b>Gedaan vandaag</b><span id="doneLabel"></span></div>
+          <div class="section-title"><b>Gedaan</b><span id="doneLabel"></span></div>
           <div class="tasks" id="doneTasks"></div>
 
           <section class="person-strip" aria-label="Open taken per persoon" id="peopleSummary"></section>
@@ -97,6 +97,18 @@
         <div class="compact-group">
           <div class="section-title"><b data-day-title="vrijdag">Vrijdag</b><span id="weekFridayLabel"></span></div>
           <div class="compact-list" id="weekFridayTasks"></div>
+        </div>
+        <div class="compact-group">
+          <div class="section-title"><b data-day-title="zaterdag">Zaterdag</b><span id="weekSaturdayLabel"></span></div>
+          <div class="compact-list" id="weekSaturdayTasks"></div>
+        </div>
+        <div class="compact-group">
+          <div class="section-title"><b data-day-title="zondag">Zondag</b><span id="weekSundayLabel"></span></div>
+          <div class="compact-list" id="weekSundayTasks"></div>
+        </div>
+        <div class="compact-group">
+          <div class="section-title"><b>Afgerond deze week</b><span id="weekDoneLabel"></span></div>
+          <div class="compact-list" id="weekDoneTasks"></div>
         </div>
       </section>
 
@@ -127,10 +139,10 @@
             <div class="field full">
               <label>Wie</label>
               <div class="choice-row" id="personChoices">
-                <label><input type="radio" name="person" value="EV" checked><span class="person-choice"><span class="avatar ev">EV</span> Emmy</span></label>
-                <label><input type="radio" name="person" value="JV"><span class="person-choice"><span class="avatar jv">JV</span> Joris</span></label>
-                <label><input type="radio" name="person" value="JD"><span class="person-choice"><span class="avatar jd">JD</span> Juliette</span></label>
-                <label><input type="radio" name="person" value="MV"><span class="person-choice"><span class="avatar mv">MV</span> Mark</span></label>
+                <label><input type="checkbox" name="persons" value="EV" checked><span class="person-choice"><span class="avatar ev">EV</span> Emmy</span></label>
+                <label><input type="checkbox" name="persons" value="JV"><span class="person-choice"><span class="avatar jv">JV</span> Joris</span></label>
+                <label><input type="checkbox" name="persons" value="JD"><span class="person-choice"><span class="avatar jd">JD</span> Juliette</span></label>
+                <label><input type="checkbox" name="persons" value="MV"><span class="person-choice"><span class="avatar mv">MV</span> Mark</span></label>
               </div>
             </div>
 
@@ -210,6 +222,20 @@
     </div>
   </div>
 
+  <!-- App-bevestiging: vervangt native browser confirm(), zodat meldingen in de webapp blijven. -->
+  <div class="confirm-overlay" id="confirmOverlay" aria-modal="true" role="dialog" aria-labelledby="confirmTitle">
+    <div class="confirm-dialog">
+      <button class="confirm-close" type="button" id="confirmCloseButton" aria-label="Sluiten">×</button>
+      <div class="confirm-title" id="confirmTitle"></div>
+      <div class="confirm-message" id="confirmMessage"></div>
+      <ul class="confirm-list" id="confirmList"></ul>
+      <div class="confirm-actions">
+        <button class="secondary-button" type="button" id="confirmCancelButton">Annuleren</button>
+        <button class="primary-button" type="button" id="confirmPrimaryButton">OK</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Persoon-picker: getoond bij eerste gebruik of bij wisselen -->
   <div class="person-picker-overlay" id="personPickerOverlay" style="display: none;">
     <div class="person-picker">
@@ -235,6 +261,6 @@
     </div>
   </div>
 
-  <script src="app.js"></script>
+  <script type="module" src="app.js?v=20260512b"></script>
 </body>
 </html>

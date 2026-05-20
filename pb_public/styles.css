@@ -1,4 +1,5 @@
-:root {
+    /* Theme tokens: alle kleuren lopen via CSS-variabelen zodat light/dark dezelfde componenten delen. */
+    :root {
       color-scheme: light;
       --bg: #f4f2ed;
       --surface: #fffdf8;
@@ -43,6 +44,7 @@
       --nav-bg: rgba(35, 33, 29, 0.96);
     }
 
+    /* Baseline */
     * {
       box-sizing: border-box;
     }
@@ -66,6 +68,7 @@
       -webkit-tap-highlight-color: transparent;
     }
 
+    /* App shell */
     .app {
       min-height: 100vh;
       display: grid;
@@ -167,6 +170,7 @@
       box-shadow: var(--shadow);
     }
 
+    /* Vandaag-filterkaarten */
     .summary {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -239,6 +243,7 @@
       color: var(--now);
     }
 
+    /* Persoonsfilters */
     .filters {
       display: flex;
       gap: 8px;
@@ -317,6 +322,16 @@
     .avatar.jv { background: #b98216; }
     .avatar.jd { background: #7054a8; }
 
+    .avatar-stack {
+      display: inline-flex;
+      align-items: center;
+      flex: 0 0 auto;
+    }
+
+    .avatar-stack .avatar + .avatar {
+      margin-left: -10px;
+    }
+
     .board {
       display: grid;
       grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
@@ -351,6 +366,7 @@
       gap: 9px;
     }
 
+    /* Grote taakkaarten in Vandaag */
     .task {
       border: 1px solid var(--line);
       border-left-width: 6px;
@@ -541,6 +557,38 @@
       border-color: #2f7d52;
     }
 
+    .task.done.done-other .check {
+      background: #b73636;
+      border-color: #b73636;
+    }
+
+    .task.done.done-late .check {
+      background: #d98025;
+      border-color: #d98025;
+    }
+
+    .compact-check {
+      width: 30px;
+      height: 30px;
+      font-size: 17px;
+      flex: 0 0 30px;
+    }
+
+    .compact-task.done .compact-check {
+      background: #2f7d52;
+      border-color: #2f7d52;
+    }
+
+    .compact-task.done.done-other .compact-check {
+      background: #b73636;
+      border-color: #b73636;
+    }
+
+    .compact-task.done.done-late .compact-check {
+      background: #d98025;
+      border-color: #d98025;
+    }
+
     .person-strip {
       margin-top: 18px;
       border-top: 1px solid var(--line);
@@ -582,6 +630,7 @@
       display: grid;
     }
 
+    /* Compacte week- en lijstweergave */
     .compact-board {
       display: grid;
       gap: 14px;
@@ -663,6 +712,7 @@
 
     .compact-status {
       display: flex;
+      align-items: center;
       justify-content: end;
       gap: 4px;
       flex-wrap: wrap;
@@ -720,8 +770,15 @@
       font-size: 11px;
     }
 
-    .main:not(.today-mode) .summary,
-    .main:not(.today-mode) .filters {
+    .compact-task .avatar-stack .avatar + .avatar {
+      margin-left: -8px;
+    }
+
+    .main:not(.today-mode) .summary {
+      display: none;
+    }
+
+    .main.form-mode .filters {
       display: none;
     }
 
@@ -729,6 +786,7 @@
       display: none;
     }
 
+    /* Invoerscherm voor toevoegen en bewerken */
     .task-form {
       max-width: 720px;
       display: grid;
@@ -917,6 +975,7 @@
       font-weight: 700;
     }
 
+    /* Mobiele navigatie */
     .bottom-nav {
       display: none;
     }
@@ -934,6 +993,7 @@
       padding: 14px;
     }
 
+    /* Tablet en telefoon: zijbalk verdwijnt, bottom-nav verschijnt. */
     @media (max-width: 860px) {
       .app {
         display: block;
@@ -1013,6 +1073,7 @@
       }
     }
 
+    /* Smalle telefoons: compactere typografie en controls. */
     @media (max-width: 430px) {
       .main {
         padding-left: 10px;
@@ -1198,6 +1259,60 @@
   margin-bottom: 14px;
 }
 
+.task-detail-completer {
+  margin: 14px 0 16px;
+}
+
+.task-detail-completer-label {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.task-detail-completer-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.task-detail-completer-option {
+  display: block;
+  cursor: pointer;
+}
+
+.task-detail-completer-choice {
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 6px 10px;
+  color: var(--ink);
+  font-weight: 900;
+}
+
+.task-detail-completer-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.task-detail-completer-choice .avatar {
+  width: 30px;
+  height: 30px;
+  flex-basis: 30px;
+  font-size: 11px;
+}
+
+.task-detail-completer-option input:checked + .task-detail-completer-choice {
+  border-color: var(--ink);
+  box-shadow: inset 0 0 0 2px var(--ink);
+  background: var(--surface-strong);
+}
+
 .task-detail-row {
   display: grid;
   grid-template-columns: 80px 1fr;
@@ -1287,4 +1402,89 @@
 .task-detail-actions .primary-button,
 .task-detail-actions .secondary-button {
   flex: 1;
+}
+
+/* App-bevestiging */
+.confirm-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9200;
+  background: rgba(0, 0, 0, 0.52);
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.confirm-overlay.open {
+  display: flex;
+}
+
+.confirm-dialog {
+  position: relative;
+  width: min(560px, 100%);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface-strong);
+  color: var(--ink);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.38);
+  padding: 24px;
+}
+
+.confirm-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 28px;
+  line-height: 1;
+}
+
+.confirm-title {
+  margin-right: 42px;
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.confirm-message {
+  margin-top: 12px;
+  color: var(--ink);
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.confirm-list {
+  margin: 14px 0 0;
+  padding: 12px 16px 12px 28px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--muted);
+  font-weight: 750;
+}
+
+.confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.confirm-actions .secondary-button,
+.confirm-actions .primary-button,
+.confirm-actions .danger-button {
+  min-width: 150px;
+}
+
+@media (max-width: 430px) {
+  .confirm-dialog {
+    padding: 20px 16px;
+  }
+
+  .confirm-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
 }
