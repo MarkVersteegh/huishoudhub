@@ -22,8 +22,10 @@ echo "[$(date)] HuishoudHub refresh"
 echo "Werkmap: $APP_DIR"
 echo "Branch: $BRANCH"
 
+echo "Nieuwste code ophalen..."
 git fetch origin "$BRANCH"
 git pull --ff-only origin "$BRANCH"
+echo "Code is bijgewerkt naar $(git rev-parse --short HEAD)."
 
 if docker compose version >/dev/null 2>&1; then
   DOCKER_COMPOSE="docker compose"
