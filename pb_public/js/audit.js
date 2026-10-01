@@ -1,4 +1,4 @@
-import { parseDoneBy, taskSnapshot } from "./model.js?v=20260520-repeat-intervals";
+import { parseDoneBy, taskSnapshot } from "./model.js?v=20261001-help";
 
 // Bouw een append-only auditrecord met zowel samenvattende kolommen als volledige snapshot.
 export function buildTaskEvent(task, eventType, details, actors) {

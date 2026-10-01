@@ -17,6 +17,14 @@ try {
   // De app mag modules gebruiken, maar niet terugvallen naar .mjs dat PocketBase verkeerd serveert.
   assert.match(html, /type="module"/);
   assert.doesNotMatch(html, /\.mjs/);
+
+  // Help-pagina moet bereikbaar zijn vanuit de app en terug kunnen linken.
+  assert.match(html, /href="\/help\/"/);
+  const help = await fetch(baseUrl + "/help/");
+  assert.equal(help.status, 200);
+  const helpHtml = await help.text();
+  assert.match(helpHtml, /Hoe werkt HuishoudHub\?/);
+  assert.match(helpHtml, /href="\/"/);
 } finally {
   await stopTestServer(server);
 }

@@ -1,5 +1,5 @@
-import { people } from "./config.js?v=20260520-repeat-intervals";
-import { computeBucket, computeDue, computeLate, dateToDay, repeatLabel } from "./dates.js?v=20260520-repeat-intervals";
+import { people } from "./config.js?v=20261001-help";
+import { computeBucket, computeDue, computeLate, dateToDay, repeatLabel } from "./dates.js?v=20261001-help";
 
 // Kleine escape-helper omdat taakgegevens als HTML-string worden gerenderd.
 export function esc(str) {

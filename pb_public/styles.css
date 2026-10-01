@@ -233,6 +233,7 @@
       gap: 8px;
     }
 
+    .help-toggle,
     .theme-toggle,
     .fullscreen-toggle {
       width: 48px;
@@ -244,6 +245,12 @@
       font-size: 22px;
       font-weight: 900;
       box-shadow: var(--shadow);
+    }
+
+    .help-toggle {
+      display: grid;
+      place-items: center;
+      text-decoration: none;
     }
 
     .fullscreen-toggle {
@@ -1138,6 +1145,10 @@
       display: none;
     }
 
+    .bottom-help {
+      display: none;
+    }
+
     .empty {
       border: 1px dashed var(--line);
       border-radius: var(--radius);
@@ -1243,6 +1254,28 @@
       .main {
         padding-left: calc(16px + env(safe-area-inset-left));
         padding-right: calc(16px + env(safe-area-inset-right));
+      }
+
+      /* Topbar is te smal voor een vierde knop: help verhuist naar de onderbalk. */
+      .top-actions .help-toggle {
+        display: none;
+      }
+
+      .bottom-nav {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) 48px;
+      }
+
+      .bottom-help {
+        display: grid;
+        place-items: center;
+        min-height: 48px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--surface);
+        color: var(--ink);
+        font-size: 20px;
+        font-weight: 900;
+        text-decoration: none;
       }
 
       h1 {

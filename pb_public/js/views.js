@@ -1,6 +1,6 @@
-import { people } from "./config.js?v=20260520-repeat-intervals";
-import { formatDateLabel, getWeekDates, weekRange } from "./dates.js?v=20260520-repeat-intervals";
-import { completionClass, esc, taskMeta, taskPersonAvatars, taskPersonNames } from "./model.js?v=20260520-repeat-intervals";
+import { people } from "./config.js?v=20261001-help";
+import { formatDateLabel, getWeekDates, weekRange } from "./dates.js?v=20261001-help";
+import { completionClass, esc, taskMeta, taskPersonAvatars, taskPersonNames } from "./model.js?v=20261001-help";
 
 // Statusfilters en persoonsfilters zijn onafhankelijk en worden hier gecombineerd.
 export function visibleTasks(state) {

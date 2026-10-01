@@ -14,6 +14,7 @@ Frontend files are served directly from `pb_public/` with native ES modules and 
 - [pb_public/app.js](pb_public/app.js) — orchestration layer for state, form/detail modal, and event handlers
 - [pb_public/js/*.js](pb_public/js) — small modules for config, dates, model helpers, API, audit payloads, and rendering
 - [pb_public/styles.css](pb_public/styles.css) — all styles including dark theme via `[data-theme="dark"]` on `:root`
+- [pb_public/help/](pb_public/help) — static help page at `/help/` for family members, linked from the `?` button (topbar; bottom nav on phones). Update it when user-facing behaviour changes
 
 Run locally with:
 

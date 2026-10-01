@@ -1,0 +1,168 @@
+/* Help-pagina: hergebruikt de thema-tokens en avatars uit /styles.css. */
+.help-shell {
+  width: min(760px, 100%);
+  margin: 0 auto;
+  padding: calc(20px + env(safe-area-inset-top)) calc(18px + env(safe-area-inset-right)) calc(32px + env(safe-area-inset-bottom)) calc(18px + env(safe-area-inset-left));
+  line-height: 1.5;
+}
+
+.help-header h1 {
+  margin: 18px 0 6px;
+}
+
+.help-intro {
+  margin: 0 0 20px;
+  color: var(--muted);
+}
+
+.help-back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: var(--shadow);
+}
+
+.help-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+
+.help-step {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  box-shadow: var(--shadow);
+}
+
+.help-step h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 6px;
+  font-size: 20px;
+}
+
+.help-step > p {
+  margin: 0;
+}
+
+.help-num {
+  flex: 0 0 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: inline-grid;
+  place-items: center;
+  background: var(--ink);
+  color: var(--bg);
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.help-step details {
+  margin-top: 10px;
+  border-top: 1px solid var(--line);
+  padding-top: 8px;
+}
+
+.help-step summary {
+  cursor: pointer;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  color: var(--today);
+  font-weight: 800;
+  list-style: none;
+}
+
+.help-step summary::-webkit-details-marker {
+  display: none;
+}
+
+.help-step summary::before {
+  content: "▸";
+  display: inline-block;
+  width: 1.1em;
+  transition: transform 0.15s ease;
+}
+
+.help-step details[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.help-step details ul {
+  margin: 4px 0 0;
+  padding-left: 20px;
+}
+
+.help-step details li + li {
+  margin-top: 6px;
+}
+
+.help-step details li ul {
+  margin-top: 4px;
+}
+
+.help-people {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  margin-top: 6px;
+}
+
+.help-people .avatar {
+  width: 30px;
+  height: 30px;
+  flex-basis: 30px;
+  font-size: 11px;
+}
+
+.help-tag {
+  display: inline-block;
+  padding: 0 7px;
+  border-radius: 6px;
+  font-weight: 800;
+}
+
+.help-tag.danger { color: var(--danger); background: var(--danger-bg); }
+.help-tag.now { color: var(--now); background: var(--now-bg); }
+.help-tag.today { color: var(--today); background: var(--today-bg); }
+
+.help-check {
+  display: inline-block;
+  width: 1.2em;
+  height: 1.2em;
+  vertical-align: -0.25em;
+  border: 2px solid #a9a39a;
+  border-radius: 50%;
+  background: white;
+}
+
+.help-rules {
+  margin: 4px 0 10px;
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  background: var(--soon-bg);
+  color: var(--ink);
+  border-left: 4px solid var(--soon);
+}
+
+.help-rules ul {
+  margin: 4px 0 0;
+  padding-left: 20px;
+}
+
+.help-footer {
+  margin-top: 20px;
+}

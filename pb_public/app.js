@@ -1,5 +1,5 @@
-import { POCKETBASE_URL, people } from "./js/config.js?v=20260520-repeat-intervals";
-import { addMonths, dutchDays, dutchMonths, formatDateLabel, todayStr } from "./js/dates.js?v=20260520-repeat-intervals";
+import { POCKETBASE_URL, people } from "./js/config.js?v=20261001-help";
+import { addMonths, dutchDays, dutchMonths, formatDateLabel, todayStr } from "./js/dates.js?v=20261001-help";
 import {
   defaultDoneBy,
   esc,
@@ -8,7 +8,7 @@ import {
   normalize,
   parseDoneBy,
   reopenTask,
-} from "./js/model.js?v=20260520-repeat-intervals";
+} from "./js/model.js?v=20261001-help";
 import {
   createSeriesRecord,
   deleteTaskRecord,
@@ -18,9 +18,9 @@ import {
   patchTaskRecord,
   saveTaskEvent,
   saveTaskRecord,
-} from "./js/api.js?v=20260520-repeat-intervals";
-import { buildTaskEvent } from "./js/audit.js?v=20260520-repeat-intervals";
-import { render as renderView } from "./js/views.js?v=20260520-repeat-intervals";
+} from "./js/api.js?v=20261001-help";
+import { buildTaskEvent } from "./js/audit.js?v=20261001-help";
+import { render as renderView } from "./js/views.js?v=20261001-help";
 
 // Centrale UI-state; PocketBase blijft de bron van waarheid voor taakdata.
 let tasks = [];

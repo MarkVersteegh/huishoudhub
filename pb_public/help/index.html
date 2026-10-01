@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>HuishoudHub – Uitleg</title>
+  <script>
+    // Zelfde thema als de app: eigen voorkeur, anders licht overdag en donker 's avonds.
+    (function() {
+      let theme = null;
+      try { theme = localStorage.getItem("huishoudhub-theme"); } catch (e) {}
+      if (!theme) {
+        const h = new Date().getHours();
+        theme = (h >= 7 && h < 20) ? "light" : "dark";
+      }
+      document.documentElement.dataset.theme = theme;
+    })();
+  </script>
+  <link rel="stylesheet" href="/styles.css?v=20261001-help">
+  <link rel="stylesheet" href="/help/help.css?v=20261001-help">
+</head>
+<body>
+  <main class="help-shell">
+    <header class="help-header">
+      <a class="help-back" href="/">← Terug naar de app</a>
+      <h1>Hoe werkt HuishoudHub?</h1>
+      <p class="help-intro">Lees de korte uitleg per stap. Wil je meer weten? Tik op <b>Meer uitleg</b>.</p>
+    </header>
+
+    <ol class="help-steps">
+      <li class="help-step" id="wat">
+        <h2><span class="help-num">1</span> Wat is HuishoudHub?</h2>
+        <p>Onze gezamenlijke takenlijst. Iedereen ziet dezelfde taken, en als iemand iets afvinkt, zie je dat meteen op elk scherm.</p>
+        <details>
+          <summary>Meer uitleg</summary>
+          <ul>
+            <li>Een taak kan voor één persoon zijn of voor meerdere tegelijk. Je ziet aan de gekleurde rondjes voor wie hij is:
+              <span class="help-people">
+                <span class="avatar ev">EV</span> Emmy
+                <span class="avatar jv">JV</span> Joris
+                <span class="avatar jd">JD</span> Juliette
+                <span class="avatar mv">MV</span> Mark
+              </span>
+            </li>
+            <li>Veel taken komen vanzelf terug, bijvoorbeeld elke dag of elke week.</li>
+            <li>Je hoeft niets op te slaan, alles gaat automatisch.</li>
+          </ul>
+        </details>
+      </li>
+
+      <li class="help-step" id="wie">
+        <h2><span class="help-num">2</span> Wie ben jij?</h2>
+        <p>De eerste keer kies je je naam. Rechtsboven zie je daarna je initialen.</p>
+        <details>
+          <summary>Meer uitleg</summary>
+          <ul>
+            <li>Ander apparaat of iemand anders aan de beurt? Tik rechtsboven op het rondje met de initialen en kies opnieuw.</li>
+            <li>Je naam wordt per apparaat onthouden. Op de tablet in de keuken moet je dus soms even wisselen.</li>
+            <li>Als je je naam kiest, zie je meteen alleen jouw taken. Met <b>Iedereen</b> zie je weer alles (zie stap 4).</li>
+          </ul>
+        </details>
+      </li>
+
+      <li class="help-step" id="schermen">
+        <h2><span class="help-num">3</span> De schermen</h2>
+        <p><b>Vandaag</b> laat zien wat nu moet, <b>Deze week</b> geeft per dag een overzicht, en in de <b>Lijst</b> staat alles met een zoekveld.</p>
+        <details>
+          <summary>Meer uitleg</summary>
+          <ul>
+            <li><b>Vandaag</b>: bovenaan <span class="help-tag danger">Te laat</span>, dan <span class="help-tag now">Nu</span> en <span class="help-tag today">Vandaag</span>. Wat al klaar is staat bij <b>Gedaan</b>.</li>
+            <li>Wat bij <b>Nu</b> staat hangt af van het dagdeel: ochtend, middag of avond.</li>
+            <li><b>Deze week</b>: alle taken van maandag tot en met zondag, met onderaan wat deze week al af is.</li>
+            <li><b>Lijst</b>: alles in drie groepen: <i>Openstaand</i>, <i>Toekomstig</i> en <i>Afgerond</i>. Zoek op taak, naam of dag, bijvoorbeeld “douchen” of “zaterdag”.</li>
+            <li>Op een telefoon wissel je van scherm met de knoppen onderaan, op een computer of tablet met de knoppen links.</li>
+          </ul>
+        </details>
+      </li>
+
+      <li class="help-step" id="filteren">
+        <h2><span class="help-num">4</span> Filteren</h2>
+        <p>Tik op een naam om alleen die taken te zien. Met <b>Iedereen</b> zie je weer alles.</p>
+        <details>
+          <summary>Meer uitleg</summary>
+          <ul>
+            <li>Je kunt meerdere namen tegelijk aanzetten.</li>
+            <li>De tellers bovenaan (<i>te laat</i>, <i>nu</i>, <i>alles</i>) filteren ook: tik erop om alleen die taken te zien.</li>
+            <li>Zie je een taak niet? Kijk dan of er nog een filter aan staat.</li>
+          </ul>
+        </details>
+      </li>
+
+      <li class="help-step" id="afvinken">
+        <h2><span class="help-num">5</span> Afvinken</h2>
+        <div class="help-rules">
+          <b>Afspraken</b>
+          <ul>
+            <li>Klaar? Vink het <b>zelf</b> meteen af.</li>
+            <li>Heeft iemand een taak van een ander gedaan? Zet de taak dan op naam van degene die het <b>echt gedaan</b> heeft.</li>
+          </ul>
+        </div>
+        <p>Tik op het rondje <span class="help-check" aria-hidden="true"></span> op de taak om hem af te vinken.</p>
+        <details>
+          <summary>Meer uitleg</summary>
+          <ul>
+            <li><b>Het rondje</b> zet de taak op naam van degene(n) voor wie hij was.</li>
+            <li><b>Iemand anders heeft het gedaan?</b> Tik op de taak zelf (niet op het rondje). Zet bij <b>Afgerond door</b> de juiste naam aan, zet de andere namen uit en druk op <b>Afvinken</b>.</li>
+            <li>Dat mag ook voor een ander: Emmy kan bijvoorbeeld afvinken dat Mark de taak van Joris heeft gedaan.</li>
+            <li><b>Samen gedaan?</b> Zet meerdere namen aan.</li>
+            <li><b>Subtaken</b>: sommige taken hebben kleine stapjes. Klap ze uit en vink ze één voor één af. Zijn alle stapjes klaar, dan is de hele taak klaar.</li>
+            <li><b>Foutje?</b> Tik op de afgevinkte taak en druk op <b>Heropenen</b>.</li>
+          </ul>
+        </details>
+      </li>
+
+      <li class="help-step" id="toevoegen">
+        <h2><span class="help-num">6</span> Taak toevoegen of wijzigen</h2>
+        <p>Taken toevoegen, veranderen en verwijderen doen <b>papa en mama</b>. Moet er iets bij of klopt er iets niet? Vraag het even.</p>
+        <details>
+          <summary>Meer uitleg (voor papa en mama)</summary>
+          <ul>
+            <li><b>Toevoegen</b>: ga naar <b>Lijst</b> en tik rechtsboven op <b>+ Nieuwe taak</b> (op de telefoon alleen een <b>+</b>). Vul in wat er moet gebeuren, voor wie en op welke datum.</li>
+            <li><b>Tijd</b> is niet verplicht: kies een dagdeel (ochtend, middag, avond) en/of een exacte tijd. Het dagdeel bepaalt wanneer een taak bij <i>Nu</i> staat.</li>
+            <li><b>Herhaling</b>: eenmalig, elke X dagen, schooldagen, elke X weken of elke X maanden. Houd de knop even vast om X te kiezen.</li>
+            <li><b>Subtaken</b>: voeg stapjes toe met <b>+ Subtaak</b>. Sleep ze om de volgorde te veranderen.</li>
+            <li><b>Wijzigen</b>: tik op de taak en kies <b>Bewerken</b>. Bij een herhalende taak kies je onderaan:
+              <ul>
+                <li><i>Alleen deze taak</i>: alleen deze ene keer verandert.</li>
+                <li><i>Deze en toekomstige</i>: deze keer en alle volgende keren die nog niet af zijn veranderen. Je krijgt eerst te zien hoeveel taken dat zijn.</li>
+              </ul>
+            </li>
+            <li><b>Verwijderen</b>: tik op de taak, kies <b>Bewerken</b> en dan <b>Verwijderen</b>. Dit kan niet ongedaan worden gemaakt.</li>
+            <li><b>Let op bij herhalende taken:</b> <i>Verwijderen</i> haalt alleen <b>deze ene keer</b> weg. De volgende keren blijven gewoon staan. Een herhaling helemaal stoppen kan nu niet in de app zelf; dat moet via de beheeromgeving.</li>
+          </ul>
+        </details>
+      </li>
+    </ol>
+
+    <footer class="help-footer">
+      <a class="help-back" href="/">← Terug naar de app</a>
+    </footer>
+  </main>
+</body>
+</html>

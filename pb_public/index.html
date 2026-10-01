@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>HuishoudHub</title>
-  <link rel="stylesheet" href="styles.css?v=20260520-repeat-intervals">
+  <link rel="stylesheet" href="styles.css?v=20261001-help">
 </head>
 <body>
   <div class="app">
@@ -25,6 +25,7 @@
           <div class="date"></div>
         </div>
         <div class="top-actions">
+          <a class="help-toggle" href="/help/" aria-label="Uitleg" title="Uitleg">?</a>
           <button class="theme-toggle" type="button" aria-label="Donker thema" data-theme-toggle>☾</button>
           <button class="my-person-toggle" type="button" aria-label="Wissel persoon" id="showPersonPicker">
             <span class="avatar" id="myPersonAvatar">?</span>
@@ -237,6 +238,7 @@
       <button class="active" type="button" data-view-button="today">Vandaag</button>
       <button type="button" data-view-button="week">Deze week</button>
       <button type="button" data-view-button="list">Lijst</button>
+      <a class="bottom-help" href="/help/" aria-label="Uitleg" title="Uitleg">?</a>
     </nav>
   </div>
 
@@ -287,6 +289,6 @@
     </div>
   </div>
 
-  <script type="module" src="app.js?v=20260520-repeat-intervals"></script>
+  <script type="module" src="app.js?v=20261001-help"></script>
 </body>
 </html>
